@@ -47,9 +47,6 @@ function SortChargeitems(items){
         i.type=="month"?others.push(i):i.type=="water"?waters.push(i):eletrics.push(i);
       });
     }
-    console.log(waters);
-    console.log(eletrics);
-    console.log(others);
   obj={
     water:waters,
     eletric:eletrics,

@@ -47,15 +47,15 @@
       </el-form-item>
       <el-form-item label="收费项目">
         <div>
-        <el-checkbox v-model="isbtns.iswater" v-if="!edit">水费</el-checkbox>
-        <div class="m-template-wrap" v-if="isbtns.iswater" v-for="index in wmeters">
+        <el-checkbox v-model="isbtns.iswater" v-if="!edit" @change="addmeter('water')">水费</el-checkbox>
+        <div class="m-template-wrap" v-if="isbtns.iswater" v-for="(element,index) in postdata.wmeters">
           <div class="m-template-body">
           <div class="m-template-up">
-             <span>水表{{index-1}}</span>
+             <span>水表{{index}}</span>
              <el-input class="m-input-override" placeholder="请输入水表记录" >
              </el-input>
           </div>
-          <el-select v-model="postdata.chargeitems" multiple placeholder="请选择计费规则">
+          <el-select v-model="element.chargeid" placeholder="请选择计费规则">
               <el-option
                 v-for="item in waterrlue"
                 :key="item.cid"
@@ -65,19 +65,19 @@
           </el-select>
         </div>
           <div class="m-template-footer">
-            <i v-if="index==wmeters" @click="++wmeters" class="el-icon-circle-plus"/>
-            <i v-if="index>1&&index==wmeters" @click="--wmeters" class="el-icon-remove"/>
+            <i v-if="index==postdata.wmeters.length-1" @click="addmeter('water')" class="el-icon-circle-plus"/>
+            <i v-if="index>0&&index==postdata.wmeters.length-1" @click="postdata.wmeters.pop()" class="el-icon-remove"/>
           </div>
         </div>
-        <el-checkbox v-model="isbtns.iseletric" v-if="!edit">电费</el-checkbox>
-        <div class="m-template-wrap" v-if="isbtns.iseletric" v-for="index in emeters">
+        <el-checkbox v-model="isbtns.iseletric" v-if="!edit" @change="addmeter('eletric')">电费</el-checkbox>
+        <div class="m-template-wrap" v-if="isbtns.iseletric" v-for="(element,index) in postdata.emeters">
           <div class="m-template-body">
           <div class="m-template-up">
-             <span>电表{{index-1}}</span>
+             <span>电表{{index}}</span>
              <el-input class="m-input-override" placeholder="请输入电表记录" >
              </el-input>
           </div>
-          <el-select v-model="postdata.chargeitems" multiple placeholder="请选择计费规则">
+          <el-select v-model="element.chargeid"  placeholder="请选择计费规则">
               <el-option
                 v-for="item in eletricrule"
                 :key="item.cid"
@@ -87,8 +87,8 @@
           </el-select>
         </div>
           <div class="m-template-footer">
-            <i v-if="index==emeters" @click="++emeters" class="el-icon-circle-plus"/>
-            <i v-if="index>1&&index==emeters" @click="--emeters" class="el-icon-remove"/>
+            <i v-if="index==postdata.emeters.length-1" @click="addmeter('eletric')" class="el-icon-circle-plus"/>
+            <i v-if="index>0&&index==postdata.emeters.length-1" @click="postdata.emeters.pop()" class="el-icon-remove"/>
           </div>
         </div>
       </div>
@@ -154,13 +154,14 @@ data () {
       price:"",
       subprice:"",
       htype:"",
+      wmeters:[],
+      emeters:[],
       chargeitems:[],
     },
   }
 },
 computed:{
   waterrlue:function () {
-    console.log(SortChargeitems(this.chargeitems));
     return SortChargeitems(this.chargeitems).water;
   },
   eletricrule:function (){
@@ -168,9 +169,30 @@ computed:{
   },
   othercharge:function(){
     return SortChargeitems(this.chargeitems).other;
-  }
+  },
+
 },
 methods:{
+  addmeter:function(type){
+    let kvtable = {
+      water:{
+        btn:'iswater',
+        meters:'wmeters'
+      },
+      eletric:{
+        btn:'iseletric',
+        meters:'emeters'
+      }
+    };
+  this.isbtns[kvtable[type]['btn']]?(this.postdata[kvtable[type]['meters']].push({
+      number:this.postdata[kvtable[type]['meters']].length,
+      type:type,
+      current:0,
+      date:"",
+      chargeid:""
+    })):(this.postdata[kvtable[type]['meters']]=[]);
+
+  },
   getChargeById:function (row) {
     let vm = this;
     var promise = new Promise((resolve,reject)=>{
@@ -193,6 +215,8 @@ methods:{
 
   },
   resetPostdata:function(){
+    this.isbtns.iswater = false;
+    this.isbtns.iseletric = false;
     this.postdata = {
       id:"",
       number:"",
@@ -201,6 +225,8 @@ methods:{
       subprice:"",
       htype:"",
       chargeitems:[],
+      wmeters:[],
+      emeters:[]
     };
   },
   getAlldata:function () {
@@ -286,7 +312,7 @@ methods:{
   handleSubmit:function(){
    console.log(this.postdata);
    let vm = this;
-   axios.post(this.edit?'/housepage/update':'/housepage/add',this.postdata,{
+   /*axios.post(this.edit?'/housepage/update':'/housepage/add',this.postdata,{
      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
      transformRequest:[(data)=>`data=`+JSON.stringify(data)]
     }).then(
@@ -298,7 +324,7 @@ methods:{
      console.log(error);
    }).finally(
 
-   );
+   );*/
   },
   closeForm:function () {
       this.AddVisible = false;
@@ -327,8 +353,7 @@ methods:{
 .m-template-wrap{
   margin-top: .2rem;
   padding: .2rem .2rem;
-  box-shadow:0 2px 4px rgba(0, 0, 0, .12);
-  background-color: #f4f6f9;
+
 }
 .m-template-wrap span{
 
