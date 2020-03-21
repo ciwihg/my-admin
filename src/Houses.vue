@@ -47,52 +47,12 @@
       </el-form-item>
       <el-form-item label="收费项目">
         <div>
-        <el-checkbox v-model="isbtns.iswater" v-if="!edit" @change="addmeter('water')">水费</el-checkbox>
-        <div class="m-template-wrap" v-if="isbtns.iswater" v-for="(element,index) in postdata.wmeters">
-          <div class="m-template-body">
-          <div class="m-template-up">
-             <span>水表{{index}}</span>
-             <el-input class="m-input-override" placeholder="请输入水表记录" >
-             </el-input>
-          </div>
-          <el-select v-model="element.chargeid" placeholder="请选择计费规则">
-              <el-option
-                v-for="item in waterrlue"
-                :key="item.cid"
-                :label="item.name"
-                :value="item.cid">
-              </el-option>
-          </el-select>
-        </div>
-          <div class="m-template-footer">
-            <i v-if="index==postdata.wmeters.length-1" @click="addmeter('water')" class="el-icon-circle-plus"/>
-            <i v-if="index>0&&index==postdata.wmeters.length-1" @click="postdata.wmeters.pop()" class="el-icon-remove"/>
-          </div>
-        </div>
-        <el-checkbox v-model="isbtns.iseletric" v-if="!edit" @change="addmeter('eletric')">电费</el-checkbox>
-        <div class="m-template-wrap" v-if="isbtns.iseletric" v-for="(element,index) in postdata.emeters">
-          <div class="m-template-body">
-          <div class="m-template-up">
-             <span>电表{{index}}</span>
-             <el-input class="m-input-override" placeholder="请输入电表记录" >
-             </el-input>
-          </div>
-          <el-select v-model="element.chargeid"  placeholder="请选择计费规则">
-              <el-option
-                v-for="item in eletricrule"
-                :key="item.cid"
-                :label="item.name"
-                :value="item.cid">
-              </el-option>
-          </el-select>
-        </div>
-          <div class="m-template-footer">
-            <i v-if="index==postdata.emeters.length-1" @click="addmeter('eletric')" class="el-icon-circle-plus"/>
-            <i v-if="index>0&&index==postdata.emeters.length-1" @click="postdata.emeters.pop()" class="el-icon-remove"/>
-          </div>
-        </div>
+        <el-checkbox v-model="isbtns.iswater">水费</el-checkbox>
+        <m-meter-card v-if="isbtns.iswater" :rules="waterrule" type="water" :meters.sync="postdata.wmeters" :pmeters="hwmeters"></m-meter-card>
+        <el-checkbox v-model="isbtns.iseletric">电费</el-checkbox>
+        <m-meter-card v-if="isbtns.iseletric" :rules="eletricrule" type="eletric" :meters.sync="postdata.emeters" :pmeters="hemeters"></m-meter-card>
       </div>
-      <div v-if="!edit"><span>其他收费</span></div>
+      <div><span>其他收费</span></div>
         <el-select v-model="postdata.chargeitems" multiple placeholder="请选择需要收费的项目">
             <el-option
               v-for="item in othercharge"
@@ -113,9 +73,13 @@
 
 <script>
 import axios from 'axios';
+import Metercard from './component/metercard.vue';
 axios.defaults.baseURL = `https://easyhome.applinzi.com/public/index.php/ciwirent`;
-import {ObjToFormdata,DeepClone,SortChargeitems} from '../utils/utils.js';
+import {ObjToFormdata,DeepClone,SortChargeitems,HandleMeters} from '../utils/utils.js';
 export default {
+  components:{
+    'm-meter-card':Metercard
+  },
   created:function(){
     let vm = this;
     axios.get('/housepage')
@@ -147,6 +111,9 @@ data () {
       iswater:false,
       iseletric:false,
     },
+    test:[],
+    hwmeters:[],
+    hemeters:[],
     postdata:{
       id:"",
       number:"",
@@ -161,7 +128,7 @@ data () {
   }
 },
 computed:{
-  waterrlue:function () {
+  waterrule:function () {
     return SortChargeitems(this.chargeitems).water;
   },
   eletricrule:function (){
@@ -173,25 +140,27 @@ computed:{
 
 },
 methods:{
-  addmeter:function(type){
-    let kvtable = {
-      water:{
-        btn:'iswater',
-        meters:'wmeters'
-      },
-      eletric:{
-        btn:'iseletric',
-        meters:'emeters'
-      }
-    };
-  this.isbtns[kvtable[type]['btn']]?(this.postdata[kvtable[type]['meters']].push({
-      number:this.postdata[kvtable[type]['meters']].length,
-      type:type,
-      current:0,
-      date:"",
-      chargeid:""
-    })):(this.postdata[kvtable[type]['meters']]=[]);
+  getMetersById:function (row) {
+    let vm = this;
+    var promise = new Promise((resolve,reject)=>{
+      axios.post('/housepage/getmeters',{id:row.id},{
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        transformRequest:[(data)=>`data=`+JSON.stringify(data)]
+       })
+      .then(function (response) {
+      let result = HandleMeters(response.data);
+       vm.hwmeters = result.wmeters;
+       vm.isbtns.iswater = result.wmeters.length!=0;
+       vm.hemeters = result.emeters;
+       vm.isbtns.iseletric = result.emeters.length!=0;
+        resolve();
+    })
+    .catch(function (error) {
+      console.log(error);
+    })
 
+    });
+    return promise;
   },
   getChargeById:function (row) {
     let vm = this;
@@ -203,6 +172,8 @@ methods:{
       .then(function (response) {
         var tempobj = DeepClone(row);
         tempobj.chargeitems = response.data;
+        tempobj.wmeters = [];
+        tempobj.emeters = [];
         vm.postdata = tempobj;
         resolve();
     })
@@ -244,13 +215,14 @@ methods:{
   });
   },
   handleEdit:function (row){
+     console.log(this.postdata);
     this.isbtns = {
       iswater:false,
       iseletric:false
     };
     let vm = this;
     vm.edit = true;
-    Promise.all([this.getChargeById(row),this.getChargeitems()]).then(()=>{
+    Promise.all([this.getChargeById(row),this.getMetersById(row),this.getChargeitems()]).then(()=>{
       vm.AddVisible = true;
     }).catch((err)=>{
       console.log(err);
@@ -312,7 +284,7 @@ methods:{
   handleSubmit:function(){
    console.log(this.postdata);
    let vm = this;
-   /*axios.post(this.edit?'/housepage/update':'/housepage/add',this.postdata,{
+   axios.post(this.edit?'/housepage/update':'/housepage/add',this.postdata,{
      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
      transformRequest:[(data)=>`data=`+JSON.stringify(data)]
     }).then(
@@ -324,7 +296,7 @@ methods:{
      console.log(error);
    }).finally(
 
-   );*/
+   );
   },
   closeForm:function () {
       this.AddVisible = false;
@@ -353,12 +325,6 @@ methods:{
 .m-template-wrap{
   margin-top: .2rem;
   padding: .2rem .2rem;
-
-}
-.m-template-wrap span{
-
-}
-.m-input-override{
 
 }
 .m-addbtn-wrap{

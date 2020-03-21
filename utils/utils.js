@@ -40,6 +40,11 @@ function DeepClone(obj) {
   }
   return nobj;
 }
+function ArrayClone(arr){
+  return arr.map((i)=>{
+    return DeepClone(i);
+  });
+}
 function SortChargeitems(items){
   var obj,waters=[],eletrics=[],others=[];
   if(Array.isArray(items)){
@@ -54,4 +59,22 @@ function SortChargeitems(items){
   };
   return obj;
 }
-export {SetRem,FormatPrice,HandleChItmData,ObjToFormdata,DeepClone,SortChargeitems}
+function HandleMeters(data){
+  let w=[],e=[];
+  if(data.length==0){
+    return {
+      wmeters:w,
+      emeters:e
+    };
+  }else{
+    data.forEach((item) => {
+      item.type=="water"?w.push(item):e.push(item);
+    });
+    return {
+      wmeters:w,
+      emeters:e
+    };
+  }
+
+}
+export {SetRem,FormatPrice,HandleChItmData,ObjToFormdata,DeepClone,SortChargeitems,HandleMeters,ArrayClone}
