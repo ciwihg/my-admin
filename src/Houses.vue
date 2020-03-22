@@ -172,8 +172,6 @@ methods:{
       .then(function (response) {
         var tempobj = DeepClone(row);
         tempobj.chargeitems = response.data;
-        tempobj.wmeters = [];
-        tempobj.emeters = [];
         vm.postdata = tempobj;
         resolve();
     })
@@ -223,6 +221,8 @@ methods:{
     let vm = this;
     vm.edit = true;
     Promise.all([this.getChargeById(row),this.getMetersById(row),this.getChargeitems()]).then(()=>{
+         vm.postdata.emeters = vm.hemeters;
+         vm.postdata.wmeters = vm.hwmeters;
       vm.AddVisible = true;
     }).catch((err)=>{
       console.log(err);
@@ -282,8 +282,16 @@ methods:{
     });
   },
   handleSubmit:function(){
-   console.log(this.postdata);
+
    let vm = this;
+  if(!this.isbtns.iswater){
+    this.postdata.wmeters = [];
+  }
+    if(!this.isbtns.iseletric){
+      this.postdata.emeters = [];
+    }
+
+   console.log(this.postdata);
    axios.post(this.edit?'/housepage/update':'/housepage/add',this.postdata,{
      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
      transformRequest:[(data)=>`data=`+JSON.stringify(data)]

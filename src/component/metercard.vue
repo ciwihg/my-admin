@@ -47,14 +47,14 @@ created:function(){
   let empty = [];
   if(this.pmeters.length==0){
     this.add = true;
-    this.$emit("update:meters",empty);
+    //this.$emit("update:meters",empty);
   }else{
   this.pmeters.map((i)=>{
     vm.meters.push(i);
   });
    this.add = false;
     this.meters.shift();
-    this.$emit("update:meters",this.meters);
+    //this.$emit("update:meters",this.meters);
   }
 },
 mounted:function(){

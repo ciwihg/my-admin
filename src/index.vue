@@ -39,7 +39,7 @@ default-active="/"  :router="true">
   <i class="el-icon-menu"></i>
   <span slot="title">收费项目</span>
 </el-menu-item>
-<el-menu-item index="4">
+<el-menu-item index="records">
   <i class="el-icon-document"></i>
   <span slot="title">水电表记录</span>
 </el-menu-item>
