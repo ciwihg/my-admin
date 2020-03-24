@@ -1,16 +1,57 @@
 <template>
   <div class="m-list-wrap">
     <div class="m-meter-header">
-      <div class="m-meter-header-body">
+      <div class="m-meter-header-body" @click="tt">
           <div class="m-meter-header-number">101房</div>
           <div class="m-meter-header-address">朝阳巷5号</div>
       </div>
     </div>
-    <div>
+    <div class="m-content-wrap">
+      <div class="m-tabs-wrap">
          <m-selecttabs v-model="activetype">
           <m-singetab name="水表">水表</m-singetab>
           <m-singetab name="电表">电表</m-singetab>
         </m-selecttabs>
+      </div>
+        <div class="m-select-bar">
+        <el-select class="m-select-meter" v-model="value" placeholder="请选择">
+            <el-option
+              v-for="item in options"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value">
+            </el-option>
+        </el-select>
+        <el-select class="m-select-year" v-model="value" placeholder="请选择">
+            <el-option
+              v-for="item in options"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value">
+            </el-option>
+        </el-select>
+      </div>
+      <el-table
+      :data="tableData"
+      :stripe="true"
+      style="width: 100%">
+      <el-table-column
+        prop="date"
+        label="日期"
+        class="m-list-style">
+      </el-table-column>
+      <el-table-column
+        prop="name"
+        label="姓名"
+        class="m-list-style">
+      </el-table-column>
+      <el-table-column
+        prop="address"
+        class="m-list-style"
+        label="地址">
+      </el-table-column>
+    </el-table>
+
     </div>
   </div>
 </template>
@@ -26,10 +67,42 @@ export default {
   },
   data () {
     return {
-      activetype:"水表"
+      activetype:"电表",
+      value:"0",
+      options:[
+        {
+          label:'水表0',
+          value:"0",
+        },
+        {
+          label:'水表1',
+          value:"1",
+        },
+
+      ],
+      tableData: [{
+           date: '2016-05-02',
+           name: '王小虎',
+           address: '上海市普陀区金沙江路 1518 弄'
+         }, {
+           date: '2016-05-04',
+           name: '王小虎',
+           address: '上海市普陀区金沙江路 1517 弄'
+         }, {
+           date: '2016-05-01',
+           name: '王小虎',
+           address: '上海市普陀区金沙江路 1519 弄'
+         }, {
+           date: '2016-05-03',
+           name: '王小虎',
+           address: '上海市普陀区金沙江路 1516 弄'
+         }]
     };
   },
   methods:{
+    tt:function () {
+      console.log(this.activetype);
+    },
     handletypeswitch:function(tab, event){
       console.log(tab, event);
     }
@@ -38,9 +111,37 @@ export default {
 </script>
 
 <style scoped>
+.m-select-meter{
+  margin-right: .05rem;
+}
+.m-select-year{
+  margin-left: .05rem;
+}
+.m-tabs-wrap{
+  padding: .1rem .2rem;
+}
+.m-content-wrap{
+  margin-top: .2rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.03);
+  background-color: white;
+}
+.m-list-style{
+  width:33%;
+}
+.m-select-bar{
+  display: flex;
+  flex-direction: row;
+  justify-content:space-between;
+  margin-top: .1rem;
+  padding: .05rem .1rem;
+}
 .m-meter-header-body{
   display: inline-block;
   vertical-align: top;
+
+}
+.m-meter-header{
+  font-size: 0;
 }
 .m-meter-header::before{
   content: "";
