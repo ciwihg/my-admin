@@ -32,6 +32,8 @@
 </template>
 
 <script>
+import axios from 'axios';
+axios.defaults.baseURL = `https://easyhome.applinzi.com/public/index.php/ciwirent`;
 export default {
   created:function(){
     this.$emit('update:title',this.title);
