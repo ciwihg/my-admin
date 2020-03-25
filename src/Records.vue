@@ -54,7 +54,7 @@ data () {
 methods:{
   handleSubmit:function () {
     console.log(this.postdata);
-    this.$router.push({path:'/records/meter/1'});
+    //this.$router.push({path:'/records/meter/1'});
   }
 }
 }

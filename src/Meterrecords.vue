@@ -36,19 +36,25 @@
       :stripe="true"
       style="width: 100%">
       <el-table-column
+        prop="data"
+        label="记录"
+        align="center"
+        class="m-list-style">
+      </el-table-column>
+      <el-table-column
         prop="date"
         label="日期"
+        align="center"
         class="m-list-style">
       </el-table-column>
       <el-table-column
-        prop="name"
-        label="姓名"
-        class="m-list-style">
-      </el-table-column>
-      <el-table-column
-        prop="address"
+        align="center"
         class="m-list-style"
-        label="地址">
+        label="操作">
+        <template slot-scope="scope">
+          <i @click="handleEdit(scope.row)" class="el-icon-edit-outline m-meter-btn"/>
+          <i @click="handleDelete(scope.row)" class="el-icon-delete-solid m-meter-btn"/>
+        </template>
       </el-table-column>
     </el-table>
 
@@ -103,6 +109,12 @@ export default {
     tt:function () {
       console.log(this.activetype);
     },
+    handleEdit:function () {
+
+    },
+    handleEdit:function () {
+
+    },
     handletypeswitch:function(tab, event){
       console.log(tab, event);
     }
@@ -111,6 +123,10 @@ export default {
 </script>
 
 <style scoped>
+.m-meter-btn{
+  color:#409eff;
+  font-size: .2rem;
+}
 .m-select-meter{
   margin-right: .05rem;
 }
