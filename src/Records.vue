@@ -16,9 +16,9 @@
       <el-select v-model="postdata.address" placeholder="请选择地址">
         <el-option
           v-for="item in address"
-          :key="item"
-          :label="item"
-          :value="item">
+          :key="item.address"
+          :label="item.address"
+          :value="item.address">
         </el-option>
       </el-select>
     </el-form-item>
@@ -36,6 +36,14 @@ import axios from 'axios';
 axios.defaults.baseURL = `https://easyhome.applinzi.com/public/index.php/ciwirent`;
 export default {
   created:function(){
+    let vm = this;
+    axios.get('/recordspage').then((response)=>{
+      vm.address = response.data;
+    }).catch((error)=>{
+      console.log(error);
+    }).finally(()=>{
+
+    });
     this.$emit('update:title',this.title);
     this.$parent.$refs.drawer.closeDrawer();
   },
@@ -48,14 +56,22 @@ data () {
        address:""
      },
      address:[
-       'hengtan',
-       'chaoyang'
      ]
   }
 },
 methods:{
   handleSubmit:function () {
     console.log(this.postdata);
+    let vm = this;
+    axios.post('/recordspage/gethid',this.postdata,{
+      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+      transformRequest:[(data)=>`data=`+JSON.stringify(data)]
+    }).then((response)=>{
+      console.log(response.data);
+      vm.$router.push({path:`/records/meter/${response.data[0].id}`});
+    }).catch((err)=>{
+      console.log(err);
+    });
     //this.$router.push({path:'/records/meter/1'});
   }
 }

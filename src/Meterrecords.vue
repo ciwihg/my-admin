@@ -63,6 +63,8 @@
 </template>
 
 <script>
+import axios from 'axios';
+axios.defaults.baseURL = `https://easyhome.applinzi.com/public/index.php/ciwirent`;
 import Selecttabs from "./component/selecttabs.vue";
 import Singetab from "./component/singletab.vue";
 export default {
@@ -70,6 +72,19 @@ export default {
   components:{
     "m-selecttabs":Selecttabs,
     "m-singetab":Singetab
+  },
+  created:function(){
+    let vm = this;
+
+    axios.post('/recordspage/getrecords',this.$route.params,{
+      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+      transformRequest:[(data)=>`data=`+JSON.stringify(data)]
+    }).then((response)=>{
+      console.log(response.data);
+      
+    }).catch((err)=>{
+      console.log(err);
+    });
   },
   data () {
     return {
