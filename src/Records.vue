@@ -68,7 +68,14 @@ methods:{
       transformRequest:[(data)=>`data=`+JSON.stringify(data)]
     }).then((response)=>{
       console.log(response.data);
-      vm.$router.push({path:`/records/meter/${response.data[0].id}`});
+      if(response.data.meters&&response.data.id){
+      vm.$router.push({name:'Meterrecords',params:{hid:response.data.id,info:vm.postdata}});}
+      else{
+        let msg;
+        response.data.id?msg="该租盘并没有收取水电费":msg="输入有误，该租盘并不存在";
+        this.$message.warning (msg);
+        this.dialogVisible = false;
+      }
     }).catch((err)=>{
       console.log(err);
     });

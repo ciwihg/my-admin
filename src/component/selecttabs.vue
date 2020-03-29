@@ -66,7 +66,7 @@ export default {
       this.nactive.active = false;
       t.active = true;
       this.nactive = t;
-      console.log(t);
+      //console.log(t);
       this.$refs.indicator.style.width=`${t.$el.offsetWidth-this.hpadding}px`;
       this.$refs.indicator.style.transform=`translateX(${t.position}px)`;
      this.$emit("updateactive",t.name);

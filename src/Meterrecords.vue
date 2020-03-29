@@ -2,32 +2,32 @@
   <div class="m-list-wrap">
     <div class="m-meter-header">
       <div class="m-meter-header-body" @click="tt">
-          <div class="m-meter-header-number">101房</div>
-          <div class="m-meter-header-address">朝阳巷5号</div>
+          <div class="m-meter-header-number">{{hinfo.number}}</div>
+          <div class="m-meter-header-address">{{hinfo.address}}</div>
       </div>
     </div>
     <div class="m-content-wrap">
       <div class="m-tabs-wrap">
-         <m-selecttabs v-model="activetype">
-          <m-singetab name="水表">水表</m-singetab>
-          <m-singetab name="电表">电表</m-singetab>
+         <m-selecttabs v-model="activetype" @updateactive="handletypeswitch">
+          <m-singetab name="water">水表</m-singetab>
+          <m-singetab name="eletric">电表</m-singetab>
         </m-selecttabs>
       </div>
         <div class="m-select-bar">
-        <el-select class="m-select-meter" v-model="value" placeholder="请选择">
+        <el-select class="m-select-meter" v-model="postdata.mid" placeholder="请选择" @change="handleSubmit">
             <el-option
-              v-for="item in options"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value">
+              v-for="item in ometers"
+              :key="item.id"
+              :label="swtype[item.type]+item.number"
+              :value="item.id">
             </el-option>
         </el-select>
-        <el-select class="m-select-year" v-model="value" placeholder="请选择">
+        <el-select class="m-select-year" v-model="postdata.year" placeholder="请选择" @change="handleSubmit">
             <el-option
-              v-for="item in options"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value">
+              v-for="item in oyears"
+              :key="item.YEARS"
+              :label="item.YEARS+`年`"
+              :value="item.YEARS">
             </el-option>
         </el-select>
       </div>
@@ -75,21 +75,48 @@ export default {
   },
   created:function(){
     let vm = this;
-
+    this.hinfo = this.$route.params.info;
     axios.post('/recordspage/getrecords',this.$route.params,{
       headers: {'Content-Type': 'application/x-www-form-urlencoded'},
       transformRequest:[(data)=>`data=`+JSON.stringify(data)]
     }).then((response)=>{
       console.log(response.data);
-      
+      this.datascopy = response.data;
+      this.postdata.mid = this.datascopy.wmeterdefault;
+      this.ometers = this.datascopy.water;
+      this.tableData = this.datascopy.wrecords;
     }).catch((err)=>{
       console.log(err);
     });
   },
+  computed:{
+  oyears:function(){
+     let result=[];
+          if(this.postdata.mid!=''){
+            this.postdata.year=this.datascopy.years[this.postdata.mid][0].YEARS;
+            result= this.datascopy.years[this.postdata.mid];
+          }
+    return result;
+  }
+  },
   data () {
     return {
-      activetype:"电表",
-      value:"0",
+      activetype:"water",
+      cmeter:"0",
+      ometers:[],
+      hinfo:{
+        number:"",
+        address:""
+      },
+      datascopy:{},
+      postdata:{
+        mid:'',
+        year:''
+      },
+      swtype:{
+        water:'水表',
+        eletric:'电表'
+      },
       options:[
         {
           label:'水表0',
@@ -121,6 +148,17 @@ export default {
     };
   },
   methods:{
+    handleSubmit:function(){
+      console.log(this.postdata);
+      axios.post('/recordspage/getrecordsbymidandyear',this.postdata,{
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        transformRequest:[(data)=>`data=`+JSON.stringify(data)]
+      }).then((response)=>{
+        this.tableData = response.data;
+      }).catch((err)=>{
+        console.log(err);
+      })
+    },
     tt:function () {
       console.log(this.activetype);
     },
@@ -130,8 +168,17 @@ export default {
     handleEdit:function () {
 
     },
-    handletypeswitch:function(tab, event){
-      console.log(tab, event);
+    switchDefaultdatas:function (type) {
+      const stable={
+        water:'w',
+        eletric:'e'
+      };
+      this.postdata.mid = this.datascopy[stable[type]+'meterdefault'];
+      this.ometers = this.datascopy[type];
+      this.tableData = this.datascopy[stable[type]+'records'];
+    },
+    handletypeswitch:function(tab){
+      this.switchDefaultdatas(tab);
     }
   }
 }

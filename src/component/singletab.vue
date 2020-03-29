@@ -7,7 +7,7 @@
 <script>
 export default {
   name: '',
-  props:['name','nowactive'],
+  props:['name','nowactive','type'],
   data () {
     return {
       active:false,
