@@ -5,6 +5,23 @@
       <i class="el-icon-edit-outline"/>
       <div class="m-customer-tab-title">客户登记</div>
     </div>
+
+  </div>
+  <div class="m-customer-card">
+    <div class="m-customer-card-name">李四</div>
+    <div class="m-customer-card-address">103房 朝阳巷5号</div>
+    <div>
+      <div class="m-customer-card-checkin m-customer-date">登记日期:2020-03-09</div><div class="m-customer-card-leave m-customer-date">离开日期:2020-04-09</div>
+    </div>
+    <div class="m-customer-card-action"><span>查看</span><span>编辑</span><span>删除</span></div>
+  </div>
+  <div class="m-customer-card">
+    <div class="m-customer-card-name">李四</div>
+    <div class="m-customer-card-address">103房 朝阳巷5号</div>
+    <div>
+      <div class="m-customer-card-checkin m-customer-date">登记日期:2020-03-09</div><div class="m-customer-card-leave m-customer-date">离开日期:2020-04-09</div>
+    </div>
+    <div class="m-customer-card-action"><span>查看</span><span>编辑</span><span>删除</span></div>
   </div>
   <el-dialog  class="m-dialog-override" width="95%" :show-close="false" :visible.sync="AddVisible">
     <el-form  :model="renterform" label-position="top">
@@ -176,6 +193,37 @@ data () {
 </script>
 
 <style scoped>
+.m-customer-card-action{
+  display: flex;
+  justify-content: flex-end;
+  margin-top: .1rem;
+}
+.m-customer-card-action span{
+  margin-left: .1rem;
+  color: rgb(102, 177, 255);
+}
+.m-customer-date{
+  color: #909399;
+  font-size: .14rem;
+  display: inline-block;
+  margin-right: .1rem;
+}
+.m-customer-card-address{
+  color: #606266;
+  font-size: .14rem;
+}
+.m-customer-card-name{
+  font-size: .15rem;
+  font-weight: 600;
+  color: #303133;
+}
+.m-customer-card{
+  margin-top: .1rem;
+  font-size: .15rem;
+  background-color: white;
+  padding: .2rem .2rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.03);
+}
 .m-dialog-footer{
       background-color: rgb(247, 249, 249);
       margin: 0 -20px -30px -20px;

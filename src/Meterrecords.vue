@@ -162,11 +162,11 @@ export default {
     tt:function () {
       console.log(this.activetype);
     },
-    handleEdit:function () {
-
+    handleEdit:function (scop) {
+      console.log(scop);
     },
-    handleEdit:function () {
-
+    handleDelete:function (scop) {
+      console.log(scop);
     },
     switchDefaultdatas:function (type) {
       const stable={
