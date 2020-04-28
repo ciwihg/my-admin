@@ -40,6 +40,8 @@
         :file-list="idjpglist"
         :on-remove="handleremovejpg"
         :before-upload="changeidjpgdata"
+        :limit='2'
+        :on-exceed="handlefileexceed"
             action="https://easyhome.applinzi.com/public/index.php/ciwirent/fileupload"
             list-type="picture-card"
             :auto-upload="true"
@@ -95,6 +97,13 @@ export default {
   created:function(){
     this.$emit('update:title',this.title);
     this.$parent.$refs.drawer.closeDrawer();
+      axios.get('/customerpage/getallrenters').then(function(response){
+        console.log(response.data);
+      }).catch(
+        function (error) {
+          console.log(error);
+        }
+      );
   },
   methods:{
     deljpgs:function(jpgs){
@@ -141,6 +150,16 @@ export default {
       }).catch(function (error) {
         console.log(error);
       });
+    },
+    handlefileexceed:function (){
+      this.$confirm('不能上传更多身份证照片了', '提示', {
+         confirmButtonText: '确定',
+         type: 'warning'
+       }).then(() => {
+
+       }).catch(() => {
+
+       });
     },
     handleremovejpg:function (file,filelist) {
       file.response?this.deletejpgs.push(file.response):this.deletejpgs.push(file.name);
