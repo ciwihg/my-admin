@@ -7,21 +7,13 @@
     </div>
 
   </div>
-  <div class="m-customer-card">
-    <div class="m-customer-card-name">李四</div>
-    <div class="m-customer-card-address">103房 朝阳巷5号</div>
+  <div class="m-customer-card" v-for="(renter,index) in renters">
+    <div class="m-customer-card-name">{{renter.name}}</div>
+    <div class="m-customer-card-address">{{renter.number+"-"+renter.address}}</div>
     <div>
-      <div class="m-customer-card-checkin m-customer-date">登记日期:2020-03-09</div><div class="m-customer-card-leave m-customer-date">离开日期:2020-04-09</div>
+      <div class="m-customer-card-checkin m-customer-date">{{"登记日期:"+renter.checkin}}</div><div v-if="renter.checkout!='0000-00-00'" class="m-customer-card-leave m-customer-date">{{"离开日期:"+renter.checkout}}</div>
     </div>
-    <div class="m-customer-card-action"><span>查看</span><span>编辑</span><span>删除</span></div>
-  </div>
-  <div class="m-customer-card">
-    <div class="m-customer-card-name">李四</div>
-    <div class="m-customer-card-address">103房 朝阳巷5号</div>
-    <div>
-      <div class="m-customer-card-checkin m-customer-date">登记日期:2020-03-09</div><div class="m-customer-card-leave m-customer-date">离开日期:2020-04-09</div>
-    </div>
-    <div class="m-customer-card-action"><span>查看</span><span>编辑</span><span>删除</span></div>
+    <div class="m-customer-card-action"><span>查看</span><span @click="handleEdit(index)">编辑</span><span>删除</span></div>
   </div>
   <el-dialog  class="m-dialog-override" width="95%" :show-close="false" :visible.sync="AddVisible">
     <el-form  :model="renterform" label-position="top">
@@ -82,7 +74,7 @@
       </el-form-item>
     </el-form>
     <div class="m-dialog-footer">
-      <el-button type="primary" @click="handlesubmit">登记</el-button>
+      <el-button type="primary" @click="handlesubmit">保存</el-button>
       <el-button type="info" @click="requestdeletejpgs">取消</el-button>
     </div>
   </el-dialog>
@@ -93,12 +85,15 @@
 <script>
 import axios from 'axios';
 axios.defaults.baseURL = `https://easyhome.applinzi.com/public/index.php/ciwirent`;
+let storageprex="http://easyhome-rentadmin.stor.sinaapp.com/idcard/";
 export default {
   created:function(){
-    this.$emit('update:title',this.title);
-    this.$parent.$refs.drawer.closeDrawer();
+    let vm = this;
+    //this.$emit('update:title',this.title);
+
+    //this.$parent.$refs.drawer.closeDrawer();
       axios.get('/customerpage/getallrenters').then(function(response){
-        console.log(response.data);
+        vm.renters = response.data;
       }).catch(
         function (error) {
           console.log(error);
@@ -124,6 +119,20 @@ export default {
     changeidjpgdata:function(){
 
     },
+    handleEdit:function(i){
+      console.log(this.renters[i]);
+      this.renterform.name=this.renters[i].name;
+      this.renterform.idnum=this.renters[i].idnum;
+      this.renterform.callnum=this.renters[i].callnum;
+      this.renterform.roomate=String(this.renters[i].roomate);
+      this.renterform.checkin=this.renters[i].checkin;
+      this.renterform.address=this.renters[i].address;
+      this.renterform.hnum=this.renters[i].number;
+      this.idjpglist = JSON.parse(this.renters[i].idjpg).map(function(i){
+        return {name:i,url:storageprex+i}
+      });
+      this.AddVisible = true;
+    },
     handleupsuccess:function(res,file,filelist){
       this.renterform.idjpg=filelist.map((e)=>{
         if(e.response){
@@ -137,8 +146,8 @@ export default {
     },
     handlesubmit:function(){
       let vm = this;
-      this.deljpgs(this.deletejpgs);
-      axios.post('/customerpage/add',{data:this.renterform},{
+       console.log(this.idjpglist);
+      /*axios.post('/customerpage/add',{data:this.renterform},{
         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
         transformRequest:[(data)=>`data=`+JSON.stringify(data)]
       }).then(function(response){
@@ -149,7 +158,7 @@ export default {
         }
       }).catch(function (error) {
         console.log(error);
-      });
+      });*/
     },
     handlefileexceed:function (){
       this.$confirm('不能上传更多身份证照片了', '提示', {
@@ -179,6 +188,7 @@ data () {
     idjpglist:[
 
     ],
+    renters:[],
     title:"客户管理",
     AddVisible:false,
     deletejpgs:[],
