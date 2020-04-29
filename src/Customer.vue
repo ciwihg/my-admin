@@ -129,36 +129,47 @@ export default {
       this.renterform.address=this.renters[i].address;
       this.renterform.hnum=this.renters[i].number;
       this.idjpglist = JSON.parse(this.renters[i].idjpg).map(function(i){
-        return {name:i,url:storageprex+i}
+        return {name:i.filename,url:storageprex+i.filename}
       });
       this.AddVisible = true;
     },
     handleupsuccess:function(res,file,filelist){
       this.renterform.idjpg=filelist.map((e)=>{
         if(e.response){
-          return e.response;
+          return {filename:e.response,savetoidcard:true};
         }else{
-          return e.name;
+          return {filename:e.name,savetoidcard:false};
         }
          });
-      console.log(this.renterform.idjpg);
+      console.log(filelist);
 
+    },
+    requesthandlejpgs:function () {
+      axios.post('/fileupload/handlejpgs',{delete:this.deletejpgs,save:this.renterform.idjpg},{
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        transformRequest:[(data)=>`data=`+JSON.stringify(data)]
+      }).then(function(response){
+
+      }).catch(function (error) {
+        console.log(error);
+      });
     },
     handlesubmit:function(){
       let vm = this;
-       console.log(this.idjpglist);
-      /*axios.post('/customerpage/add',{data:this.renterform},{
+
+      axios.post('/customerpage/add',{data:this.renterform},{
         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
         transformRequest:[(data)=>`data=`+JSON.stringify(data)]
       }).then(function(response){
         if(response.data.success){
           vm.AddVisible=false;
+          vm.requesthandlejpgs();
         }else{
 
         }
       }).catch(function (error) {
         console.log(error);
-      });*/
+      });
     },
     handlefileexceed:function (){
       this.$confirm('不能上传更多身份证照片了', '提示', {
@@ -171,15 +182,15 @@ export default {
        });
     },
     handleremovejpg:function (file,filelist) {
-      file.response?this.deletejpgs.push(file.response):this.deletejpgs.push(file.name);
+      file.response?this.deletejpgs.push({filename:file.response,deletefromidcard:false}):this.deletejpgs.push({filename:file.name,deletefromidcard:true});
       this.renterform.idjpg=filelist.map((e)=>{
         if(e.response){
-          return e.response;
+          return {filename:e.response,savetoidcard:true};
         }else{
-          return e.name;
+          return {filename:e.name,savetoidcard:false};
         }
          });
-      console.log(this.renterform.idjpg);
+      console.log(filelist);
 
     }
   },
