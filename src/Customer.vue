@@ -1,6 +1,6 @@
 <template>
 <div class="m-list-wrap">
-  <div class="m-customer-tab" @click="AddVisible=true">
+  <div class="m-customer-tab" @click="handleAddrenter">
     <div class="m-customer-body">
       <i class="el-icon-edit-outline"/>
       <div class="m-customer-tab-title">客户登记</div>
@@ -72,6 +72,14 @@
            placeholder="选择日期">
          </el-date-picker>
       </el-form-item>
+      <el-form-item label="离开日期" v-if="this.edit&&(renterform.checkout!='0000-00-00')">
+        <el-date-picker
+           value-format="yyyy-MM-dd"
+           v-model="renterform.checkout"
+           type="date"
+           placeholder="选择日期">
+         </el-date-picker>
+      </el-form-item>
     </el-form>
     <div class="m-dialog-footer">
       <el-button type="primary" @click="handlesubmit">保存</el-button>
@@ -83,6 +91,7 @@
 </template>
 
 <script>
+import {DeepClone} from '../utils/utils.js';
 import axios from 'axios';
 axios.defaults.baseURL = `https://easyhome.applinzi.com/public/index.php/ciwirent`;
 let storageprex="http://easyhome-rentadmin.stor.sinaapp.com/idcard/";
@@ -111,17 +120,50 @@ export default {
         console.log(error);
       });
     },
+    handleAddrenter:function(){
+      this.renterform = DeepClone(this.baseform);
+      this.deletejpgs=[];
+      this.idjpglist=[];
+      this.edit=false;
+      this.AddVisible=true;
+    },
     requestdeletejpgs:function() {
       this.AddVisible=false;
-      let alljpgs = this.renterform.idjpg.concat(this.deletejpgs);
-      this.deljpgs(alljpgs);
+    
     },
     changeidjpgdata:function(){
 
     },
     handleEdit:function(i){
       console.log(this.renters[i]);
-      this.renterform.name=this.renters[i].name;
+      this.edit=true;
+      this.deletejpgs=[];
+      let vm = this;
+      axios.post('/customerpage/getrenterbyid',{id:this.renters[i].rid},{
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        transformRequest:[(data)=>`data=`+JSON.stringify(data)]
+      }).then(function(response){
+        console.log(response.data);
+        let tmp = response.data[0];
+        vm.renterform.id=tmp.rid;
+        vm.renterform.name=tmp.name;
+        vm.renterform.idnum=tmp.idnum;
+        vm.renterform.callnum=tmp.callnum;
+        vm.renterform.roomate=String(tmp.roomate);
+        vm.renterform.checkin=tmp.checkin;
+        vm.renterform.address=tmp.address;
+        vm.renterform.hnum=tmp.number;
+        vm.renterform.checkout=tmp.checkout;
+        vm.renterform.idjpg=JSON.parse(tmp.idjpg);
+        vm.idjpglist = JSON.parse(tmp.idjpg).map(function(i){
+          return {name:i.filename,url:storageprex+i.filename}
+        });
+        vm.AddVisible = true;
+      }).catch(function (error) {
+        console.log(error);
+      });
+
+      /*this.renterform.name=this.renters[i].name;
       this.renterform.idnum=this.renters[i].idnum;
       this.renterform.callnum=this.renters[i].callnum;
       this.renterform.roomate=String(this.renters[i].roomate);
@@ -131,7 +173,7 @@ export default {
       this.idjpglist = JSON.parse(this.renters[i].idjpg).map(function(i){
         return {name:i.filename,url:storageprex+i.filename}
       });
-      this.AddVisible = true;
+      this.AddVisible = true;*/
     },
     handleupsuccess:function(res,file,filelist){
       this.renterform.idjpg=filelist.map((e)=>{
@@ -141,6 +183,7 @@ export default {
           return {filename:e.name,savetoidcard:false};
         }
          });
+         this.reqhandlejpg=true;
       console.log(filelist);
 
     },
@@ -156,20 +199,45 @@ export default {
     },
     handlesubmit:function(){
       let vm = this;
+      if(this.edit){
+        axios.post('/customerpage/edit',{data:this.renterform},{
+          headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+          transformRequest:[(data)=>`data=`+JSON.stringify(data)]
+        }).then(function(response){
+          if(response.data.success){
+            vm.AddVisible=false;
+            vm.reqhandlejpg&&vm.requesthandlejpgs();
+          }else{
+            vm.$confirm('该租盘并不存在', '提示', {
+               confirmButtonText: '确定',
+               type: 'warning'
+             }).then(() => {
 
-      axios.post('/customerpage/add',{data:this.renterform},{
-        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-        transformRequest:[(data)=>`data=`+JSON.stringify(data)]
-      }).then(function(response){
-        if(response.data.success){
-          vm.AddVisible=false;
-          vm.requesthandlejpgs();
-        }else{
+             }).catch(() => {
 
-        }
-      }).catch(function (error) {
-        console.log(error);
-      });
+             });
+
+          }
+        }).catch(function (error) {
+          console.log(error);
+        });
+
+      }else{
+        axios.post('/customerpage/add',{data:this.renterform},{
+          headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+          transformRequest:[(data)=>`data=`+JSON.stringify(data)]
+        }).then(function(response){
+          if(response.data.success){
+            vm.AddVisible=false;
+            vm.requesthandlejpgs();
+          }else{
+
+          }
+        }).catch(function (error) {
+          console.log(error);
+        });
+      }
+
     },
     handlefileexceed:function (){
       this.$confirm('不能上传更多身份证照片了', '提示', {
@@ -190,6 +258,7 @@ export default {
           return {filename:e.name,savetoidcard:false};
         }
          });
+         this.reqhandlejpg=true;
       console.log(filelist);
 
     }
@@ -199,6 +268,8 @@ data () {
     idjpglist:[
 
     ],
+    edit:false,
+    reqhandlejpg:false,
     renters:[],
     title:"客户管理",
     AddVisible:false,
@@ -217,7 +288,8 @@ data () {
       value:"1",
       label:"同居人"
     }],
-    renterform:{
+    baseform:{
+      id:"",
       name:"",
       idnum:"",
       callnum:"",
@@ -225,7 +297,20 @@ data () {
       roomate:"",
       checkin:"",
       address:"",
-      hnum:""
+      hnum:"",
+      checkout:"",
+    },
+    renterform:{
+      id:"",
+      name:"",
+      idnum:"",
+      callnum:"",
+      idjpg:[],
+      roomate:"",
+      checkin:"",
+      address:"",
+      hnum:"",
+      checkout:"",
     }
   }
 }
