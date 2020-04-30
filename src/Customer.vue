@@ -101,6 +101,11 @@ export default {
     //this.$emit('update:title',this.title);
 
     //this.$parent.$refs.drawer.closeDrawer();
+    this.getrenters();
+  },
+  methods:{
+    getrenters:function(){
+      let vm = this;
       axios.get('/customerpage/getallrenters').then(function(response){
         vm.renters = response.data;
       }).catch(
@@ -108,8 +113,7 @@ export default {
           console.log(error);
         }
       );
-  },
-  methods:{
+    },
     deljpgs:function(jpgs){
       axios.post('/fileupload/deletejpgs',{jpgs:jpgs},{
         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
@@ -129,7 +133,7 @@ export default {
     },
     requestdeletejpgs:function() {
       this.AddVisible=false;
-    
+
     },
     changeidjpgdata:function(){
 
@@ -206,6 +210,7 @@ export default {
         }).then(function(response){
           if(response.data.success){
             vm.AddVisible=false;
+            vm.getrenters();
             vm.reqhandlejpg&&vm.requesthandlejpgs();
           }else{
             vm.$confirm('该租盘并不存在', '提示', {
@@ -318,6 +323,9 @@ data () {
 </script>
 
 <style scoped>
+.is-leave{
+  background-color: rgb(235,235,235);
+}
 .m-customer-card-action{
   display: flex;
   justify-content: flex-end;
