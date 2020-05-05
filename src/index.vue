@@ -14,7 +14,7 @@
    </div>
 </div>
 <div class="m-title-bar">
-  <span>{{title}}</span>
+  <span v-if="showbtnback" @click="$router.go(-1)" class="m-navbtn-back"><i class="el-icon-back"/></span><span>{{title}}</span>
 </div>
 <router-view :title.sync="title"></router-view>
   <el-drawer ref="drawer"
@@ -47,7 +47,7 @@ default-active="/"  :router="true">
   <i class="el-icon-setting"></i>
   <span slot="title">客户管理</span>
 </el-menu-item>
-<el-menu-item index="6">
+<el-menu-item index="/checkout">
   <i class="el-icon-setting"></i>
   <span slot="title">抄表打印</span>
 </el-menu-item>
@@ -68,6 +68,7 @@ export default {
       opendraw: false,
       usrimg:uimg,
       title:'首页',
+      showbtnback:false
     }
   },
   methods:{
@@ -79,7 +80,14 @@ export default {
 </script>
 
 <style scoped>
-
+.m-navbtn-back{
+  margin-right: .2rem;
+}
+.m-navbtn-back i{
+  font-size: .2rem;
+  color: #409eff;
+  font-weight: 700;
+}
 .m-title-bar{
 margin: 0 .3rem 0 .3rem;
 background-color: rgb(255,255,255);

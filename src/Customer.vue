@@ -7,13 +7,13 @@
     </div>
 
   </div>
-  <div class="m-customer-card" v-for="(renter,index) in renters">
+  <div class="m-customer-card" v-for="(renter,index) in renters"  v-bind:class="{ 'is-leave': renter.checkout!='0000-00-00'}">
     <div class="m-customer-card-name">{{renter.name}}</div>
     <div class="m-customer-card-address">{{renter.number+"-"+renter.address}}</div>
     <div>
       <div class="m-customer-card-checkin m-customer-date">{{"登记日期:"+renter.checkin}}</div><div v-if="renter.checkout!='0000-00-00'" class="m-customer-card-leave m-customer-date">{{"离开日期:"+renter.checkout}}</div>
     </div>
-    <div class="m-customer-card-action"><span>查看</span><span @click="handleEdit(index)">编辑</span><span>删除</span></div>
+    <div class="m-customer-card-action"><span>查看</span><span @click="handleEdit(index)">编辑</span><span @click="handleDelete(index)">删除</span></div>
   </div>
   <el-dialog  class="m-dialog-override" width="95%" :show-close="false" :visible.sync="AddVisible">
     <el-form  :model="renterform" label-position="top">
@@ -98,9 +98,8 @@ let storageprex="http://easyhome-rentadmin.stor.sinaapp.com/idcard/";
 export default {
   created:function(){
     let vm = this;
-    //this.$emit('update:title',this.title);
-
-    //this.$parent.$refs.drawer.closeDrawer();
+    this.$emit('update:title',this.title);
+    this.$parent.$refs.drawer&&this.$parent.$refs.drawer.closeDrawer();
     this.getrenters();
   },
   methods:{
@@ -138,8 +137,25 @@ export default {
     changeidjpgdata:function(){
 
     },
+    handleDelete:function(i){
+      let vm = this;
+      axios.post('/customerpage/deletebyid',{id:this.renters[i].rid},{
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        transformRequest:[(data)=>`data=`+JSON.stringify(data)]
+      }).then(function(response){
+        vm.getrenters();
+        vm.deletejpgs = JSON.parse(vm.renters[i].idjpg).map(function(i){
+          return {filename:i.filename,deletefromidcard:true}
+        });
+        vm.renterform.idjpg = [];
+        vm.requesthandlejpgs();
+      }).catch(function(err){
+        console.log(err);
+      });
+    },
     handleEdit:function(i){
       console.log(this.renters[i]);
+      this.reqhandlejpg = false;
       this.edit=true;
       this.deletejpgs=[];
       let vm = this;
@@ -234,6 +250,7 @@ export default {
         }).then(function(response){
           if(response.data.success){
             vm.AddVisible=false;
+            vm.getrenters();
             vm.requesthandlejpgs();
           }else{
 
@@ -324,7 +341,7 @@ data () {
 
 <style scoped>
 .is-leave{
-  background-color: rgb(235,235,235);
+  background-color: rgb(235,235,235) !important;
 }
 .m-customer-card-action{
   display: flex;
