@@ -37,19 +37,19 @@
      <tr v-for="(item,index) in emeters">
        <th  class="m-bill-rowhead" rowspan="2" v-if="index==0">电费</th>
        <td>{{'电表'+item.number}}</td>
-       <td>10</td>
+       <td>{{item.current}}</td>
        <td>{{item.data}}</td>
-       <td>2</td>
+       <td>{{item.current-item.data}}</td>
        <td>{{item.uprice}}</td>
-       <td>2</td>
+       <td>{{item.total}}</td>
      </tr>
       <tr>
        <th>小计</th>
        <td colspan="5"></td>
-       <th>10</th>
+       <th>{{efee}}</th>
      </tr>
    </table>
-   <table class="m-bill-table">
+   <table class="m-bill-table" v-if="wmeters.length>0">
      <tr>
        <th></th>
        <th>水表</th>
@@ -59,27 +59,19 @@
        <th>水价</th>
        <th>总价</th>
      </tr>
-     <tr>
-       <th  class="m-bill-rowhead" rowspan="2">水费</th>
-       <td>水表0</td>
-       <td>10</td>
-       <td>8</td>
-       <td>2</td>
-       <td>1</td>
-       <td>2</td>
-     </tr>
-     <tr>
-       <td>水表1</td>
-       <td>13</td>
-       <td>5</td>
-       <td>8</td>
-       <td>1</td>
-       <td>8</td>
+     <tr v-for="(item,index) in wmeters">
+       <th  class="m-bill-rowhead" rowspan="2" v-if="index==0">水费</th>
+       <td>{{`水表`+item.number}}</td>
+       <td>{{item.current}}</td>
+       <td>{{item.data}}</td>
+       <td>{{item.current-item.data}}</td>
+       <td>{{item.uprice}}</td>
+       <td>{{item.total}}</td>
      </tr>
       <tr>
        <th>小计</th>
        <td colspan="5"></td>
-       <th>10</th>
+       <th>{{wfee}}</th>
      </tr>
    </table>
    <el-table
@@ -87,12 +79,12 @@
     show-summary
     style="width: 100%">
     <el-table-column
-      prop="chargeitem"
+      prop="name"
       label="收款项目"
       >
     </el-table-column>
     <el-table-column
-      prop="price"
+      prop="uprice"
       label="价格"
       >
     </el-table-column>
@@ -108,15 +100,10 @@ export default {
 data () {
   return {
     title:"抄表及打印1",
-    tableData:[{
-      chargeitem:"电费",
-      price:2,
-    },
-    {
-      chargeitem:"水费",
-      price:2,
-    }],
+    tableData:[],
     wmeters:[],
+    wfee:0,
+    efee:0,
     emeters:[],
     houseinfo:{
       id: "",
@@ -146,6 +133,8 @@ created:function () {
       i.current="";i.total=0;
       return i;
     });
+    vm.tableData=response.data.chargeitems;
+    vm.tableData.push({name:'租金',uprice:vm.houseinfo.price});
     console.log(response.data);
   }).catch(function(err){
     console.log(err);
@@ -160,9 +149,18 @@ created:function () {
 methods:{
   handlegeneratebill:function () {
     console.log(this.wmeters);
+    let vm = this;
+    vm.wfee=0,vm.efee=0;
     this.wmeters.map((i)=>{
-      
-    })
+      i.total=(i.current-i.data)*i.uprice;
+      vm.wfee+=i.total;
+    });
+    (this.wmeters.length>0)&&this.tableData.push({name:'水费',uprice:this.wfee});
+    this.emeters.map((i)=>{
+      i.total=(i.current-i.data)*i.uprice;
+      vm.efee+=i.total;
+    });
+    (this.emeters.length>0)&&this.tableData.push({name:'电费',uprice:this.efee});
     console.log(this.emeters);
   }
 },
