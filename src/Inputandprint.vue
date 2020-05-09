@@ -23,80 +23,18 @@
     </div>
      <div class="m-input-footer"><el-button type="primary" @click="handlegeneratebill">生成账单</el-button></div>
     </div>
-    <div class="m-bill-wrap">
-   <table class="m-bill-table" v-if="emeters.length>0">
-     <tr>
-       <th></th>
-       <th>电表</th>
-       <th>本次度数</th>
-       <th>末次度数</th>
-       <th>用电量</th>
-       <th>电价</th>
-       <th>总价</th>
-     </tr>
-     <tr v-for="(item,index) in emeters">
-       <th  class="m-bill-rowhead" rowspan="2" v-if="index==0">电费</th>
-       <td>{{'电表'+item.number}}</td>
-       <td>{{item.current}}</td>
-       <td>{{item.data}}</td>
-       <td>{{item.current-item.data}}</td>
-       <td>{{item.uprice}}</td>
-       <td>{{item.total}}</td>
-     </tr>
-      <tr>
-       <th>小计</th>
-       <td colspan="5"></td>
-       <th>{{efee}}</th>
-     </tr>
-   </table>
-   <table class="m-bill-table" v-if="wmeters.length>0">
-     <tr>
-       <th></th>
-       <th>水表</th>
-       <th>本次度数</th>
-       <th>末次度数</th>
-       <th>用水量</th>
-       <th>水价</th>
-       <th>总价</th>
-     </tr>
-     <tr v-for="(item,index) in wmeters">
-       <th  class="m-bill-rowhead" rowspan="2" v-if="index==0">水费</th>
-       <td>{{`水表`+item.number}}</td>
-       <td>{{item.current}}</td>
-       <td>{{item.data}}</td>
-       <td>{{item.current-item.data}}</td>
-       <td>{{item.uprice}}</td>
-       <td>{{item.total}}</td>
-     </tr>
-      <tr>
-       <th>小计</th>
-       <td colspan="5"></td>
-       <th>{{wfee}}</th>
-     </tr>
-   </table>
-   <el-table
-    :data="tableData"
-    show-summary
-    style="width: 100%">
-    <el-table-column
-      prop="name"
-      label="收款项目"
-      >
-    </el-table-column>
-    <el-table-column
-      prop="uprice"
-      label="价格"
-      >
-    </el-table-column>
-  </el-table>
-    </div>
+    <m-bill :billdata="mbill" v-if="showbill"></m-bill>
   </div>
 </template>
 
 <script>
+import bill from './component/bill.vue';
 import axios from 'axios';
 axios.defaults.baseURL = `https://easyhome.applinzi.com/public/index.php/ciwirent`;
 export default {
+  components:{
+    'm-bill':bill,
+  },
 data () {
   return {
     title:"抄表及打印1",
@@ -105,6 +43,13 @@ data () {
     wfee:0,
     efee:0,
     emeters:[],
+    mbill:{
+      house:{},
+      wmeters:[],
+      emeters:[],
+      chargeitems:[]
+    },
+    showbill:false,
     houseinfo:{
       id: "",
       number: "",
@@ -124,7 +69,13 @@ created:function () {
     transformRequest:[(data)=>`data=`+JSON.stringify(data)]
    })
   .then(function (response) {
+    console.log(response.data);
     vm.houseinfo=response.data.house;
+    vm.mbill.house=response.data.house;
+    vm.mbill.chargeitems=response.data.chargeitems.map((i)=>{
+      i.uprice=Number(i.uprice).toFixed(2);
+     return i;
+    });
     vm.wmeters=response.data.wmeters.map((i)=>{
       i.current="";i.total=0;
       return i;
@@ -133,8 +84,11 @@ created:function () {
       i.current="";i.total=0;
       return i;
     });
-    vm.tableData=response.data.chargeitems;
-    vm.tableData.push({name:'租金',uprice:vm.houseinfo.price});
+    vm.tableData=response.data.chargeitems.map((i)=>{
+      i.uprice=Number(i.uprice).toFixed(2);
+      return i;
+    });
+    vm.tableData.push({name:'租金',uprice:Number(vm.houseinfo.price).toFixed(2)});
     console.log(response.data);
   }).catch(function(err){
     console.log(err);
@@ -148,6 +102,9 @@ created:function () {
 },
 methods:{
   handlegeneratebill:function () {
+    this.mbill.wmeters=this.wmeters;
+    this.mbill.emeters=this.emeters;
+    this.showbill=true;
     console.log(this.wmeters);
     let vm = this;
     vm.wfee=0,vm.efee=0;
@@ -155,13 +112,17 @@ methods:{
       i.total=(i.current-i.data)*i.uprice;
       vm.wfee+=i.total;
     });
-    (this.wmeters.length>0)&&this.tableData.push({name:'水费',uprice:this.wfee});
+    (this.wmeters.length>0)&&this.tableData.push({name:'水费',uprice:Number(this.wfee).toFixed(2)});
     this.emeters.map((i)=>{
       i.total=(i.current-i.data)*i.uprice;
       vm.efee+=i.total;
     });
-    (this.emeters.length>0)&&this.tableData.push({name:'电费',uprice:this.efee});
-    console.log(this.emeters);
+    (this.emeters.length>0)&&this.tableData.push({name:'电费',uprice:Number(this.efee).toFixed(2)});
+    let total =0;
+    this.tableData.map((i)=>{
+      total+=parseFloat(i.uprice);
+    });
+    this.tableData.push({name:'合计',uprice:Number(total).toFixed(2)});
   }
 },
 destroyed:function(){
@@ -263,7 +224,5 @@ destroyed:function(){
   font-weight: 400;
   margin-bottom: .05rem;
 }
-col{
-  width:5%;
-}
+
 </style>
