@@ -6,22 +6,23 @@
           <div class="m-meter-header-address">{{houseinfo.address}}</div>
       </div>
     </div>
+    <div class="m-billhistory-btn">历史账单 <i class="el-icon-arrow-right"/></div>
     <div class="m-input-wrap">
     <div class="m-input-card" v-if="emeters.length>0" v-for="item in emeters">
       <div class="m-input-title">{{"电表"+item.number}}</div>
       <div class="m-input-last">{{`末次记录:${item.data}  ${item.date}`}}</div>
-      <el-input placeholder="请输入内容" v-model="item.current">
+      <el-input placeholder="请输入内容" :disabled="showbill" v-model="item.current">
         <template slot="prepend">本次记录</template>
       </el-input>
     </div>
     <div class="m-input-card" v-if="wmeters.length>0" v-for="item in wmeters">
       <div class="m-input-title">{{"水表"+item.number}}</div>
       <div class="m-input-last">{{`末次记录:${item.data}  ${item.date}`}}</div>
-      <el-input placeholder="请输入内容" v-model="item.current" >
+      <el-input placeholder="请输入内容" :disabled="showbill" v-model="item.current" >
         <template slot="prepend">本次记录</template>
       </el-input>
     </div>
-     <div class="m-input-footer"><el-button type="primary" @click="handlegeneratebill">生成账单</el-button></div>
+     <div class="m-input-footer"><el-button type="primary" :disabled="showbill" @click="handlegeneratebill">生成账单</el-button></div>
     </div>
     <m-bill :billdata="mbill" v-if="showbill"></m-bill>
   </div>
@@ -106,7 +107,16 @@ methods:{
     this.mbill.emeters=this.emeters;
     this.showbill=true;
     console.log(this.wmeters);
-    let vm = this;
+    axios.post('/billpage/inputmeterrecord',{meters:this.wmeters.concat(this.emeters)},{
+      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+      transformRequest:[(data)=>`data=`+JSON.stringify(data)]
+     })
+    .then(function (response) {
+      console.log(response.data);
+    }).catch(function(err){
+      console.log(err);
+    })
+    /*let vm = this;
     vm.wfee=0,vm.efee=0;
     this.wmeters.map((i)=>{
       i.total=(i.current-i.data)*i.uprice;
@@ -122,7 +132,7 @@ methods:{
     this.tableData.map((i)=>{
       total+=parseFloat(i.uprice);
     });
-    this.tableData.push({name:'合计',uprice:Number(total).toFixed(2)});
+    this.tableData.push({name:'合计',uprice:Number(total).toFixed(2)});*/
   }
 },
 destroyed:function(){
@@ -132,6 +142,24 @@ destroyed:function(){
 </script>
 
 <style scoped>
+.m-billhistory-btn{
+  font-size: .15rem;
+  padding: .15rem .2rem .15rem .3rem;
+  font-weight: 700;
+  background-color: white;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.03);
+  margin-bottom: .2rem;
+  color: rgb(180,180,180);
+  border-radius: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.m-billhistory-btn i{
+  font-size: .2rem;
+  font-weight: 900;
+  color: #409eff;
+}
 .m-bill-table{
 
   width: 100%;

@@ -35,11 +35,7 @@ export default {
 data () {
   return {
     title:"抄表及打印",
-    tableData:[{
-      date:"05-03",
-      number:"201",
-      address:"横潭大街32-1号"
-    }]
+    tableData:[]
   }
 },
 created:function(){
@@ -47,7 +43,20 @@ created:function(){
   this.$emit('update:title',this.title);
   this.$parent.$refs.drawer&&this.$parent.$refs.drawer.closeDrawer();
   axios.get("/checkoutpage").then(function(res){
-    vm.tableData = res.data;
+    let today=new Date(Date.now());
+    var day1=24*60*60*1000;
+    let odate=[];
+    odate.push(today.getDate());
+    for(let i=1;i<=3;i++){
+      let today=Date.now();
+      let dateobj=new Date(today-i*day1);
+      odate.push(dateobj.getDate());
+      dateobj=new Date(today+i*day1);
+      odate.push(dateobj.getDate());
+    }
+    vm.tableData = res.data.filter(i=>
+      odate.includes(new Date(i.date).getDate())
+);
   }).catch(function (err) {
     console.log(err);
   });
@@ -55,7 +64,6 @@ created:function(){
 },
 methods:{
   handlerowclick:function (row) {
-    console.log(row);
     this.$router.push({name:'Inputprint',params:{hid:row.id}});
   }
 }
