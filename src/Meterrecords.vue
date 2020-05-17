@@ -7,6 +7,20 @@
       </div>
     </div>
     <div class="m-content-wrap">
+      <div class="m-mode-bar">
+        <el-radio v-model="displaymode" label="compare">对比表格</el-radio>
+        <el-radio v-model="displaymode" label="independent">单独表格</el-radio>
+      </div>
+      <div>
+        <el-table :data="comparetable">
+          <el-table-column v-for="item in comparetabledata"
+      :prop="item.type+item.number"
+      :label="item.type+item.number"
+      width="180">
+    </el-table-column>
+        </el-table>
+      </div>
+      <div v-if="displaymode=='independent'">
       <div class="m-tabs-wrap">
          <m-selecttabs v-model="activetype" @updateactive="handletypeswitch">
           <m-singetab name="water">水表</m-singetab>
@@ -57,7 +71,7 @@
         </template>
       </el-table-column>
     </el-table>
-
+  </div>
     </div>
   </div>
 </template>
@@ -82,6 +96,7 @@ export default {
     }).then((response)=>{
       console.log(response.data);
       this.datascopy = response.data;
+      this.comparetabledata = response.data.meters;
       this.postdata.mid = this.datascopy.wmeterdefault;
       this.ometers = this.datascopy.water;
       this.tableData = this.datascopy.wrecords;
@@ -97,10 +112,19 @@ export default {
             result= this.datascopy.years[this.postdata.mid];
           }
     return result;
+  },
+  comparetable:function(){
+    let result={};
+    this.comparetabledata.forEach((item) => {
+      result[item.type+item.number]=item.data ;
+    });
+    console.log(result);
+    return [result];
   }
   },
   data () {
     return {
+      displaymode:"compare",
       activetype:"water",
       cmeter:"0",
       ometers:[],
@@ -108,6 +132,7 @@ export default {
         number:"",
         address:""
       },
+      comparetabledata:[],
       datascopy:{},
       postdata:{
         mid:'',
@@ -185,6 +210,10 @@ export default {
 </script>
 
 <style scoped>
+.m-mode-bar{
+  font-size: 0;
+  padding: .2rem;
+}
 .m-meter-btn{
   color:#409eff;
   font-size: .2rem;

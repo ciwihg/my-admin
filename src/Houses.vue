@@ -48,9 +48,9 @@
       <el-form-item label="收费项目">
         <div>
         <el-checkbox v-model="isbtns.iswater">水费</el-checkbox>
-        <m-meter-card v-if="isbtns.iswater" :rules="waterrule" type="water" :meters.sync="postdata.wmeters" :pmeters="hwmeters"></m-meter-card>
+        <m-meter-card v-if="isbtns.iswater" :rules="waterrule" type="water" :meters.sync="postdata.wmeters" :pmeters="hwmeters" :setbtn="setistbtns"></m-meter-card>
         <el-checkbox v-model="isbtns.iseletric">电费</el-checkbox>
-        <m-meter-card v-if="isbtns.iseletric" :rules="eletricrule" type="eletric" :meters.sync="postdata.emeters" :pmeters="hemeters"></m-meter-card>
+        <m-meter-card v-if="isbtns.iseletric" :rules="eletricrule" type="eletric" :meters.sync="postdata.emeters" :pmeters="hemeters" :setbtn="setistbtns"></m-meter-card>
       </div>
       <div><span>其他收费</span></div>
         <el-select v-model="postdata.chargeitems" multiple placeholder="请选择需要收费的项目">
@@ -140,6 +140,9 @@ computed:{
 
 },
 methods:{
+  setistbtns:function(index,bl){
+    this.isbtns['is'+index]=bl;
+  },
   getMetersById:function (row) {
     let vm = this;
     var promise = new Promise((resolve,reject)=>{
@@ -184,6 +187,8 @@ methods:{
 
   },
   resetPostdata:function(){
+    this.hwmeters=[];
+    this.hemeters=[];
     this.isbtns.iswater = false;
     this.isbtns.iseletric = false;
     this.postdata = {
