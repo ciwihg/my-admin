@@ -11,12 +11,17 @@
         <el-radio v-model="displaymode" label="compare">对比表格</el-radio>
         <el-radio v-model="displaymode" label="independent">单独表格</el-radio>
       </div>
-      <div>
+      <div v-if="displaymode=='compare'">
         <el-table :data="comparetable">
+          <el-table-column
+      prop="date"
+      label="日期"
+      width="80">
+    </el-table-column>
           <el-table-column v-for="item in comparetabledata"
-      :prop="item.type+item.number"
+      :prop="String(item.id)"
       :label="item.type+item.number"
-      width="180">
+      width="50">
     </el-table-column>
         </el-table>
       </div>
@@ -115,11 +120,25 @@ export default {
   },
   comparetable:function(){
     let result={};
-    this.comparetabledata.forEach((item) => {
-      result[item.type+item.number]=item.data ;
-    });
+    let records;
+    (this.datascopy.records)&&(records=Object.values(this.datascopy.records));
+    console.log(records);
+    if(Array.isArray(records)){
+      records.forEach((item) => {
+        item.forEach((i) => {
+          if(result[i.date]){
+            result[i.date][i.mid]=i.data;
+          }else{
+            result[i.date]={date:i.date};
+            result[i.date][i.mid]=i.data;
+          }
+        });
+
+      });
+
+    }
     console.log(result);
-    return [result];
+    return Object.values(result);
   }
   },
   data () {
