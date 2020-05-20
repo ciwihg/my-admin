@@ -12,16 +12,36 @@
         <el-radio v-model="displaymode" label="independent">单独表格</el-radio>
       </div>
       <div v-if="displaymode=='compare'">
+        <div class="m-compare-topbar">
+          <el-date-picker
+
+            type="year"
+            placeholder="选择年">
+          </el-date-picker>
+          <i class="el-icon-circle-plus m-plus-btn" @click="handlecompareadd"/>
+        </div>
         <el-table :data="comparetable">
           <el-table-column
+           fixed
+           align="center"
       prop="date"
       label="日期"
       width="80">
     </el-table-column>
           <el-table-column v-for="item in comparetabledata"
       :prop="String(item.id)"
-      :label="item.type+item.number"
-      width="50">
+      align="center"
+      :label="swtype[item.type]+item.number"
+      width="60">
+    </el-table-column>
+    <el-table-column
+      align="center"
+      prop="action"
+      label="操作">
+      <template slot-scope="scope">
+        <i @click="handleEdit(scope.row)" class="el-icon-edit-outline m-house-abtn"/>
+        <i @click="handleDelete(scope.row)" class="el-icon-delete-solid m-house-abtn"/>
+      </template>
     </el-table-column>
         </el-table>
       </div>
@@ -78,6 +98,17 @@
     </el-table>
   </div>
     </div>
+    <el-dialog
+  title="批量新增记录"
+  :visible.sync="cformVisible"
+  :show-close="false"
+  width="90%">
+  <span>这是一段信息</span>
+  <span slot="footer" class="dialog-footer">
+    <el-button @click="cformVisible = false">取 消</el-button>
+    <el-button type="primary" @click="cformVisible = false">确 定</el-button>
+  </span>
+</el-dialog>
   </div>
 </template>
 
@@ -143,6 +174,7 @@ export default {
   },
   data () {
     return {
+      cformVisible:false,
       displaymode:"compare",
       activetype:"water",
       cmeter:"0",
@@ -192,6 +224,9 @@ export default {
     };
   },
   methods:{
+    handlecompareadd:function () {
+      this.cformVisible=true;
+    },
     handleSubmit:function(){
       console.log(this.postdata);
       axios.post('/recordspage/getrecordsbymidandyear',this.postdata,{
@@ -229,6 +264,19 @@ export default {
 </script>
 
 <style scoped>
+.m-compare-topbar{
+  display: flex;
+  font-size: 0;
+  align-items: center;
+}
+.m-plus-btn{
+  color:#409eff;
+  font-size: .4rem;
+}
+.m-house-abtn{
+  color:#409eff;
+  font-size: .2rem;
+}
 .m-mode-bar{
   font-size: 0;
   padding: .2rem;
