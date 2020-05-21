@@ -39,8 +39,8 @@
       prop="action"
       label="操作">
       <template slot-scope="scope">
-        <i @click="handleEdit(scope.row)" class="el-icon-edit-outline m-house-abtn"/>
-        <i @click="handleDelete(scope.row)" class="el-icon-delete-solid m-house-abtn"/>
+        <i @click="handlecEdit(scope.row)" class="el-icon-edit-outline m-house-abtn"/>
+        <i @click="handlecDelete(scope.row)" class="el-icon-delete-solid m-house-abtn"/>
       </template>
     </el-table-column>
         </el-table>
@@ -99,14 +99,23 @@
   </div>
     </div>
     <el-dialog
+    v-if="datascopy.meters"
   title="批量新增记录"
   :visible.sync="cformVisible"
   :show-close="false"
   width="90%">
-  <span>这是一段信息</span>
+  <div><span>{{cmetername}}</span></div>
+  <el-input  v-model="cmeterdata" placeholder="请输入记录" v-if="cmeternum<datascopy.meters.length"></el-input>
+  <el-date-picker
+  v-model="cpostdate.date"
+    v-if="cmeternum==datascopy.meters.length"
+    type="date"
+    placeholder="选择年">
+  </el-date-picker>
+  <el-button @click="handlecomaddnext" type="primary" v-if="cmeternum<datascopy.meters.length">下一项</el-button>
   <span slot="footer" class="dialog-footer">
     <el-button @click="cformVisible = false">取 消</el-button>
-    <el-button type="primary" @click="cformVisible = false">确 定</el-button>
+    <el-button type="primary" @click="cformVisible = false" v-if="cmeternum==datascopy.meters.length">保 存</el-button>
   </span>
 </el-dialog>
   </div>
@@ -174,6 +183,15 @@ export default {
   },
   data () {
     return {
+      cpostdate:{
+        records:[],
+        date:""
+      },
+      cedit:false,
+      ceditdata:{},
+      cmeternum:0,
+      cmetername:"",
+      cmeterdata:"",
       cformVisible:false,
       displaymode:"compare",
       activetype:"water",
@@ -224,8 +242,37 @@ export default {
     };
   },
   methods:{
+    handlecEdit:function (row) {
+      this.ceditdata=row;
+      this.cedit=true;
+      console.log(row);
+      this.handlecompareadd();
+      this.cmeterdata=this.ceditdata[this.datascopy.meters[this.cmeternum].id];
+    },
+    handlecDelete:function (row) {
+      console.log(row);
+    },
+    handlecomaddnext:function (){
+      let temp={};
+      temp.id = this.datascopy.meters[this.cmeternum].id;
+      temp.data = this.cmeterdata;
+      this.cpostdate.records.push(temp);
+      this.cmeternum+=1;
+        if(this.cmeternum<this.datascopy.meters.length)
+        {this.cmetername=this.swtype[this.datascopy.meters[this.cmeternum].type]+this.datascopy.meters[this.cmeternum].number;
+         this.cedit?this.cmeterdata=this.ceditdata[this.datascopy.meters[this.cmeternum].id]:this.cmeterdata="";}
+        else{
+          this.cmetername="日期";
+          (this.cedit)&&(this.cpostdate.date=this.ceditdata.date);
+        }
+        console.log(this.cpostdate);
+    },
     handlecompareadd:function () {
+      this.cmeternum=0;
+      this.cpostdate.records=[];
+      this.cpostdate.date="";
       this.cformVisible=true;
+      this.cmetername=this.swtype[this.datascopy.meters[this.cmeternum].type]+this.datascopy.meters[this.cmeternum].number;
     },
     handleSubmit:function(){
       console.log(this.postdata);
