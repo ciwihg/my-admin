@@ -11,7 +11,7 @@
      <th>总价</th>
    </tr>
    <tr v-for="(item,index) in emeters">
-     <th  class="m-bill-rowhead" rowspan="2" v-if="index==0">电费</th>
+     <th  class="m-bill-rowhead" rowspan="emeters.length" v-if="index==0">电费</th>
      <td>{{'电表'+item.number}}</td>
      <td>{{Number(item.current).toFixed(2)}}</td>
      <td>{{Number(item.data).toFixed(2)}}</td>
@@ -76,16 +76,47 @@ export default {
      wfee:0,
      emeters:[],
      wmeters:[],
-     tableData:[]
+
     };
+  },
+  computed:{
+    tableData:function  (){
+      console.log("comu");
+      let vm =this;
+      let table;
+      vm.efee=0;
+      vm.wfee=0;
+      this.emeters=this.billdata.emeters;
+      this.wmeters=this.billdata.wmeters;
+      table=this.billdata.chargeitems.map((i)=>{return i;});
+      table.push({name:'租金',uprice:Number(this.billdata.house.price).toFixed(2)});
+      this.emeters.map((i)=>{
+        i.total = (i.current-i.data)*i.uprice;
+        vm.efee+=i.total;
+      });
+      (this.emeters.length>0)&&table.push({name:'电费',uprice:Number(this.efee).toFixed(2)});
+      this.wmeters.map((i)=>{
+        i.total = (i.current-i.data)*i.uprice;
+        vm.wfee+=i.total;
+      });
+      (this.wmeters.length>0)&&table.push({name:'水费',uprice:Number(this.wfee).toFixed(2)});
+      let total = 0;
+      table.map((i)=>{
+        total += parseFloat(i.uprice);
+      });
+      table.push({name:'合计',uprice:Number(total).toFixed(2)});
+      console.log(table);
+      return table;
+    }
   },
   created:function () {
     console.log(this.billdata);
-    let vm = this;
+    console.log("c");
+  /*  let vm = this;
     this.emeters=this.billdata.emeters;
     this.wmeters=this.billdata.wmeters;
     this.tableData=this.billdata.chargeitems;
-    this.tableData.push({name:'租金',uprice:Number(this.billdata.house.price).toFixed(2)})
+    this.tableData.push({name:'租金',uprice:Number(this.billdata.house.price).toFixed(2)});
     this.emeters.map((i)=>{
       i.total = (i.current-i.data)*i.uprice;
       vm.efee+=i.total;
@@ -100,7 +131,20 @@ export default {
     this.tableData.map((i)=>{
       total += parseFloat(i.uprice);
     });
-    this.tableData.push({name:'合计',uprice:Number(total).toFixed(2)});
+    this.tableData.push({name:'合计',uprice:Number(total).toFixed(2)});*/
+  },
+  mounted:function () {
+  console.log("m");
+
+  },
+  beforeupupdate:function(){
+    console.log("bu");
+  },
+  updated:function () {
+    console.log("u");
+  console.log(this.billdata);
+
+
   }
 }
 </script>

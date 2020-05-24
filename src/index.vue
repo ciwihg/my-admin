@@ -58,6 +58,7 @@ default-active="/"  :router="true">
 
 <script>
 import uimg from '../assets/img/usr.png';
+
 export default {
   mounted:function(){
     console.log(this.$refs.drawer);
@@ -72,6 +73,9 @@ export default {
     }
   },
   methods:{
+    drawpie(){
+
+    },
     handleOpendrawer(){
       this.opendraw=true;
     }

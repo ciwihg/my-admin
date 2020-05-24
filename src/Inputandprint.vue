@@ -6,8 +6,9 @@
           <div class="m-meter-header-address">{{houseinfo.address}}</div>
       </div>
     </div>
-    <div class="m-billhistory-btn">历史账单 <i class="el-icon-arrow-right"/></div>
-    <div class="m-input-wrap">
+    <div class="m-billhistory-btn" @click="billhistoryinit" v-if="!billhistory">历史账单 <i class="el-icon-arrow-right"/></div>
+    <div class="m-billhistory-btn" @click="inputrecordinit" v-if="billhistory"><i class="el-icon-arrow-left"/> 抄表</div>
+    <div class="m-input-wrap" v-if="!billhistory">
     <div class="m-input-card" v-if="emeters.length>0" v-for="item in emeters">
       <div class="m-input-title">{{"电表"+item.number}}</div>
       <div class="m-input-last">{{`末次记录:${item.data}  ${item.date}`}}</div>
@@ -22,8 +23,17 @@
         <template slot="prepend">本次记录</template>
       </el-input>
     </div>
+    <div><el-checkbox v-model="recordcheckout">离开登记</el-checkbox></div>
      <div class="m-input-footer"><el-button type="primary" :disabled="showbill" @click="handlegeneratebill">生成账单</el-button></div>
     </div>
+    <el-select v-model="billnum" placeholder="请选择" v-if="billhistory" @change="handlehisbillgenerate">
+      <el-option
+       v-for="(item,index) in billhisoptions"
+       :key="index"
+       :label="item.date"
+       :value="index">
+      </el-option>
+    </el-select>
     <m-bill :billdata="mbill" v-if="showbill"></m-bill>
   </div>
 </template>
@@ -41,9 +51,14 @@ data () {
     title:"抄表及打印1",
     tableData:[],
     wmeters:[],
+    billhistory:false,
     wfee:0,
     efee:0,
     emeters:[],
+    recordcheckout:false,
+    billhisoptions:[],
+    billhisdata:'',
+    billnum:'',
     mbill:{
       house:{},
       wmeters:[],
@@ -102,12 +117,49 @@ created:function () {
   });*/
 },
 methods:{
+  inputrecordinit:function () {
+    this.billhistory=false;
+    this.showbill=false;
+  },
+  handlehisbillgenerate:function () {
+    console.log(this.billnum);
+    let vm =this;
+    this.mbill.wmeters=this.billhisdata.wmeters.map((i)=>{
+      i.current=vm.billhisdata.records[i.id][vm.billnum].data;i.total=0;i.data=vm.billhisdata.records[i.id][vm.billnum+1].data;
+      return i;
+    });
+    this.mbill.emeters=this.billhisdata.emeters.map((i)=>{
+      i.current=vm.billhisdata.records[i.id][vm.billnum].data;i.total=0;i.data=vm.billhisdata.records[i.id][vm.billnum+1].data;
+      return i;
+    });
+    console.log(this.mbill);
+    this.showbill=true;
+  },
+  billhistoryinit:function () {
+    this.showbill=false;
+    let vm =this;
+    axios.post('/billpage/getbillhistory',{id:this.$route.params.hid},{
+      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+      transformRequest:[(data)=>`data=`+JSON.stringify(data)]
+     })
+    .then(function (response) {
+      console.log(response.data);
+       vm.billhistory=true;
+       vm.billhisdata=response.data;
+       let id=response.data.wmeters[0].id;
+       vm.billhisoptions=response.data.records[id].map((i)=>{return i});
+       vm.billhisoptions.pop();
+    }).catch(function(err){
+      console.log(err);
+    });
+
+  },
   handlegeneratebill:function () {
     this.mbill.wmeters=this.wmeters;
     this.mbill.emeters=this.emeters;
     this.showbill=true;
-    console.log(this.wmeters);
-    axios.post('/billpage/inputmeterrecord',{meters:this.wmeters.concat(this.emeters)},{
+    console.log(this.recordcheckout);
+    axios.post('/billpage/inputmeterrecord',{meters:this.wmeters.concat(this.emeters),checkout:this.recordcheckout,hid:this.$route.params.hid},{
       headers: {'Content-Type': 'application/x-www-form-urlencoded'},
       transformRequest:[(data)=>`data=`+JSON.stringify(data)]
      })
@@ -115,24 +167,8 @@ methods:{
       console.log(response.data);
     }).catch(function(err){
       console.log(err);
-    })
-    /*let vm = this;
-    vm.wfee=0,vm.efee=0;
-    this.wmeters.map((i)=>{
-      i.total=(i.current-i.data)*i.uprice;
-      vm.wfee+=i.total;
     });
-    (this.wmeters.length>0)&&this.tableData.push({name:'水费',uprice:Number(this.wfee).toFixed(2)});
-    this.emeters.map((i)=>{
-      i.total=(i.current-i.data)*i.uprice;
-      vm.efee+=i.total;
-    });
-    (this.emeters.length>0)&&this.tableData.push({name:'电费',uprice:Number(this.efee).toFixed(2)});
-    let total =0;
-    this.tableData.map((i)=>{
-      total+=parseFloat(i.uprice);
-    });
-    this.tableData.push({name:'合计',uprice:Number(total).toFixed(2)});*/
+
   }
 },
 destroyed:function(){

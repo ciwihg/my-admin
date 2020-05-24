@@ -6,7 +6,9 @@ import Meterrecords from './Meterrecords.vue';
 import Inputprint from './Inputandprint.vue';
 import Customer from './Customer.vue';
 import Checkout from './Checkout.vue';
+import Dataspage from './dataspage.vue';
 const routes = [
+  { path: '/', component: Dataspage },
   { path: '/house', component: House },
   { path: '/chargeitems', component: Chargeitems },
   { path: '/records', component: Records },
@@ -19,4 +21,7 @@ const routes = [
 const router = new VueRouter({
   routes
 });
+router.beforeEach((to, from, next) => {
+  next();
+})
 export default router;

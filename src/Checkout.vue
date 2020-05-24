@@ -54,9 +54,11 @@ created:function(){
       dateobj=new Date(today+i*day1);
       odate.push(dateobj.getDate());
     }
-    vm.tableData = res.data.filter(i=>
+    /*vm.tableData = res.data.filter(i=>
       odate.includes(new Date(i.date).getDate())
-);
+);*/
+console.log(res.data);
+    vm.tableData = res.data;
   }).catch(function (err) {
     console.log(err);
   });

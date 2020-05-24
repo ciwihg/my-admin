@@ -13,7 +13,7 @@
     <div>
       <div class="m-customer-card-checkin m-customer-date">{{"登记日期:"+renter.checkin}}</div><div v-if="renter.checkout!='0000-00-00'" class="m-customer-card-leave m-customer-date">{{"离开日期:"+renter.checkout}}</div>
     </div>
-    <div class="m-customer-card-action"><span>查看</span><span @click="handleEdit(index)">编辑</span><span @click="handleDelete(index)">删除</span></div>
+    <div class="m-customer-card-action"><span @click="handlereview(renter)">查看</span><span @click="handleEdit(index)">编辑</span><span @click="handleDelete(index)">删除</span></div>
   </div>
   <el-dialog  class="m-dialog-override" width="95%" :show-close="false" :visible.sync="AddVisible">
     <el-form  :model="renterform" label-position="top">
@@ -86,6 +86,22 @@
       <el-button type="info" @click="requestdeletejpgs">取消</el-button>
     </div>
   </el-dialog>
+  <el-dialog :visible.sync="showdetail" width="90%">
+    <div class="m-customer-title">{{`${customerdata.number}   ${customerdata.address}`}}</div>
+    <div class="m-customer-row">姓名 </br><span>{{customerdata.name}}</span></div>
+    <div class="m-customer-row">身份证号码 </br><span>{{customerdata.idnum}}</span></div>
+    <div class="m-customer-row">联系电话 </br><span>{{customerdata.callnum}}</span></div>
+    <div class="m-customer-row">登记日期 </br><span>{{customerdata.checkin}}</span></div>
+    <div class="m-customer-row" v-if="customerdata.checkout!='0000-00-00'">离开日期 </br> <span>{{customerdata.checkout}}</span></div>
+    <div class="m-customer-row">
+        <el-image
+        class="m-idjpg"
+        v-for="jpg in customerdata.idjpg"
+        :src="jpg.filename"
+        :preview-src-list="jpg.previewlist">
+      </el-image>
+   </div>
+  </el-dialog>
 </div>
 
 </template>
@@ -103,6 +119,18 @@ export default {
     this.getrenters();
   },
   methods:{
+    handlereview:function (data) {
+      console.log(data);
+
+      this.customerdata=DeepClone(data);
+      this.customerdata.idjpg=JSON.parse(this.customerdata.idjpg);
+      this.customerdata.idjpg=this.customerdata.idjpg.map((i)=>{
+        i.filename=storageprex+i.filename;
+        i.previewlist=[i.filename];
+        return i;
+      });
+      this.showdetail=true;
+    },
     getrenters:function(){
       let vm = this;
       axios.get('/customerpage/getallrenters').then(function(response){
@@ -290,6 +318,8 @@ data () {
     idjpglist:[
 
     ],
+    showdetail:false,
+    customerdata:{},
     edit:false,
     reqhandlejpg:false,
     renters:[],
@@ -340,6 +370,29 @@ data () {
 </script>
 
 <style scoped>
+.m-customer-title{
+  font-size: .16rem;
+  font-weight: 700;
+  padding-bottom: .2rem;
+  padding-left: .3rem;
+}
+.m-idjpg{
+
+  width: 100%;
+}
+.m-customer-row{
+margin-bottom: .2rem;
+  font-size: .15rem;
+  font-weight: 700;
+  padding: 0 .3rem;
+}
+.m-customer-row span{
+  display: inline-block;
+  margin-top: .1rem;
+  font-size: .15rem;
+  font-weight: 500;
+  color: #909399;
+}
 .is-leave{
   background-color: rgb(235,235,235) !important;
 }
