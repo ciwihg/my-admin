@@ -7,21 +7,30 @@ import Inputprint from './Inputandprint.vue';
 import Customer from './Customer.vue';
 import Checkout from './Checkout.vue';
 import Dataspage from './dataspage.vue';
+import Login from './Login.vue';
+import Admin from './index.vue';
 const routes = [
-  { path: '/', component: Dataspage },
-  { path: '/house', component: House },
-  { path: '/chargeitems', component: Chargeitems },
-  { path: '/records', component: Records },
-  { path: '/customer', component: Customer },
-  { path: '/checkout', component: Checkout },
-  { path: '/records/meter/:hid',name:'Meterrecords', component: Meterrecords },
-  { path: '/checkout/inputandprint/:hid',name:'Inputprint', component: Inputprint }
+  { path: '/admin', component: Admin,
+    children:[
+      {path:"/",component: Dataspage},
+      {path:"house",component: House},
+      {path:"chargeitems",component: Chargeitems},
+      {path:"records",component: Records},
+      {path:"customer",component: Customer},
+      {path: 'checkout', component: Checkout},
+      {path:"records/meter/:hid",name:'Meterrecords',component: Meterrecords},
+      {path:"checkout/inputandprint/:hid",name:'Inputprint',component: Inputprint}
+  ]},
+  { path: '/', component: Login },
+
 
 ];
 const router = new VueRouter({
   routes
 });
 router.beforeEach((to, from, next) => {
+  console.log(from);
+  console.log(to);
   next();
 })
 export default router;

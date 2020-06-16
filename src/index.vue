@@ -26,28 +26,28 @@
     <span>RentAdmin</span>
   </div>
 <el-menu
-default-active="/"  :router="true">
-<el-menu-item index="/">
+default-active="/admin"  :router="true">
+<el-menu-item index="/admin">
     <i class="el-icon-s-home"></i>
     <span>首页</span>
 </el-menu-item>
-<el-menu-item index="/house">
+<el-menu-item index="/admin/house">
     <i class="el-icon-location"></i>
     <span>我的租盘</span>
 </el-menu-item>
-<el-menu-item index="/chargeitems">
+<el-menu-item index="/admin/chargeitems">
   <i class="el-icon-menu"></i>
   <span slot="title">收费项目</span>
 </el-menu-item>
-<el-menu-item index="/records">
+<el-menu-item index="/admin/records">
   <i class="el-icon-document"></i>
   <span slot="title">水电表记录</span>
 </el-menu-item>
-<el-menu-item index="/customer">
+<el-menu-item index="/admin/customer">
   <i class="el-icon-setting"></i>
   <span slot="title">客户管理</span>
 </el-menu-item>
-<el-menu-item index="/checkout">
+<el-menu-item index="/admin/checkout">
   <i class="el-icon-setting"></i>
   <span slot="title">抄表打印</span>
 </el-menu-item>

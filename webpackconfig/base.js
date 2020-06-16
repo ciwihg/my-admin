@@ -38,7 +38,7 @@ module.exports = {
         exclude: /(node_modules|bower_components)/,
         options: {
           presets: ['@babel/preset-env'],
-          plugins: []
+          plugins:  ["@babel/plugin-proposal-class-properties"]
         }
       },
       {
