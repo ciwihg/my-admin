@@ -1,5 +1,5 @@
 <template>
-<div>
+<div @click="showdropdown=false">
   <div class="header">
     <div class="m-header-nav">
         <div class="menu-btn" @click="handleOpendrawer">
@@ -7,9 +7,12 @@
             <i class="el-icon-minus menu-btn-el"></i>
             <i class="el-icon-minus menu-btn-el"></i>
        </div>
-       <div class="m-usr-wrap">
+       <div class="m-usr-wrap" @click.stop="showdropdown=!showdropdown">
          <div class="m-usr-img"><img :src="usrimg"></div>
          <i class="el-icon-caret-bottom m-usr-icon"></i>
+         <div class="m-usr-dropdown" v-if="showdropdown" >
+           <div class="m-usr-dropdown-itm" @click.stop="handlelogout">退出登录</div>
+         </div>
        </div>
    </div>
 </div>
@@ -26,28 +29,28 @@
     <span>RentAdmin</span>
   </div>
 <el-menu
-default-active="/admin"  :router="true">
-<el-menu-item index="/admin">
+default-active="/"  :router="true">
+<el-menu-item index="/">
     <i class="el-icon-s-home"></i>
     <span>首页</span>
 </el-menu-item>
-<el-menu-item index="/admin/house">
+<el-menu-item index="/house">
     <i class="el-icon-location"></i>
     <span>我的租盘</span>
 </el-menu-item>
-<el-menu-item index="/admin/chargeitems">
+<el-menu-item index="/chargeitems">
   <i class="el-icon-menu"></i>
   <span slot="title">收费项目</span>
 </el-menu-item>
-<el-menu-item index="/admin/records">
+<el-menu-item index="/records">
   <i class="el-icon-document"></i>
   <span slot="title">水电表记录</span>
 </el-menu-item>
-<el-menu-item index="/admin/customer">
+<el-menu-item index="/customer">
   <i class="el-icon-setting"></i>
   <span slot="title">客户管理</span>
 </el-menu-item>
-<el-menu-item index="/admin/checkout">
+<el-menu-item index="/checkout">
   <i class="el-icon-setting"></i>
   <span slot="title">抄表打印</span>
 </el-menu-item>
@@ -58,7 +61,9 @@ default-active="/admin"  :router="true">
 
 <script>
 import uimg from '../assets/img/usr.png';
-
+import axios from 'axios';
+axios.defaults.baseURL = `https://easyhome.applinzi.com/public/index.php/ciwirent`;
+axios.defaults.withCredentials=true;
 export default {
   mounted:function(){
     console.log(this.$refs.drawer);
@@ -69,7 +74,8 @@ export default {
       opendraw: false,
       usrimg:uimg,
       title:'首页',
-      showbtnback:false
+      showbtnback:false,
+      showdropdown:false,
     }
   },
   methods:{
@@ -78,12 +84,41 @@ export default {
     },
     handleOpendrawer(){
       this.opendraw=true;
+    },
+    handlelogout(){
+      let vm = this;
+      axios.get('/loginauth/logout')
+      .then(function (response) {
+        console.log(response);
+      vm.$router.push({path:'/login'});
+    })
+    .catch(function (error) {
+      console.log(error);
+    });
     }
   }
 }
 </script>
 
 <style scoped>
+.m-usr-dropdown-itm{
+  font-size: .13rem;
+  font-weight: 900;
+  padding: .15rem .2rem;
+  background-color: rgb(255,255,255);
+  border-radius: 3px;
+  width: 1.5rem;
+}
+.m-usr-dropdown-itm:hover{
+    background-color: rgb(250,250,250);
+}
+.m-usr-dropdown{
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.03);
+  border-radius: 3px;
+  position: absolute;
+  padding-top: .05rem;
+  right: -0.1rem;
+}
 .m-navbtn-back{
   margin-right: .2rem;
 }
@@ -151,6 +186,7 @@ align-items: center;
 .m-usr-wrap{
   display: inline-block;
   font-size: 0;
+  position: relative;
 }
 .m-usr-img{
   vertical-align: middle;

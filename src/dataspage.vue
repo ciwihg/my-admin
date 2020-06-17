@@ -14,6 +14,8 @@ data () {
   }
 },
 created:function () {
+  this.$emit('update:title','首页');
+  this.$parent.$refs.drawer.closeDrawer();
 
 },
 mounted:function () {

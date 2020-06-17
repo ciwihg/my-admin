@@ -9,8 +9,11 @@ import Checkout from './Checkout.vue';
 import Dataspage from './dataspage.vue';
 import Login from './Login.vue';
 import Admin from './index.vue';
+import axios from 'axios';
+axios.defaults.baseURL = `https://easyhome.applinzi.com/public/index.php/ciwirent`;
+axios.defaults.withCredentials=true;
 const routes = [
-  { path: '/admin', component: Admin,
+  { path: '/', component: Admin,
     children:[
       {path:"/",component: Dataspage},
       {path:"house",component: House},
@@ -21,7 +24,7 @@ const routes = [
       {path:"records/meter/:hid",name:'Meterrecords',component: Meterrecords},
       {path:"checkout/inputandprint/:hid",name:'Inputprint',component: Inputprint}
   ]},
-  { path: '/', component: Login },
+  { path: '/login', component: Login },
 
 
 ];
@@ -31,6 +34,22 @@ const router = new VueRouter({
 router.beforeEach((to, from, next) => {
   console.log(from);
   console.log(to);
-  next();
+  if(to.path=="/login"){
+    next();
+  }else{
+    axios.get('/Loginauth/auth')
+    .then(function (response) {
+    if(response.data.status){
+      next();
+    }else{
+      next('/login');
+    }
+  })
+  .catch(function (error) {
+    console.log(error);
+  });
+  }
+
+
 })
 export default router;

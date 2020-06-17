@@ -10,9 +10,9 @@
     <el-input v-model="username"></el-input>
   </el-form-item>
   <el-form-item label="密码">
-    <el-input v-model="pw"></el-input>
+    <el-input v-model="pw" show-password></el-input>
   </el-form-item>
-  <el-button type="primary" class="m-login-btn">登录</el-button>
+  <el-button type="primary" class="m-login-btn" @click="handlelogin">登录</el-button>
 </el-form>
 </div>
 </div>
@@ -20,7 +20,11 @@
 </template>
 
 <script>
+
 import Particle from '../utils/background.js';
+import axios from 'axios';
+axios.defaults.baseURL = `https://easyhome.applinzi.com/public/index.php/ciwirent`;
+axios.defaults.withCredentials=true;
 export default {
 name:'login',
 data:function(){
@@ -32,6 +36,21 @@ data:function(){
 mounted:function(){
   console.log(this.$refs.background);
   new Particle(this.$refs.background,{dotColor:'rgb(140, 197, 255)',lineColor:"rgb(198, 226, 255)"});
+},
+methods:{
+  handlelogin:function(){
+    let vm = this;
+    axios.post('/loginauth/login',{name:this.username,password:this.pw},{
+      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+      transformRequest:[(data)=>`data=`+JSON.stringify(data)]
+     })
+    .then(function (response) {
+    (response.data.msg=="AUTHED")&&(vm.$router.push({ path: '/' }));
+  })
+  .catch(function (error) {
+    console.log(error);
+  })
+  }
 }
 }
 </script>
