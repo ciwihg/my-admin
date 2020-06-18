@@ -168,7 +168,7 @@ methods:{
       this.meters.map((i)=>{
         (i.new)&&(newlength+=1)
       });
-      (newlength==0)&&this.setbtn(this.type,false);
+      (newlength==0&&this.meters.length==0)&&this.setbtn(this.type,false);
       this.$emit("update:meters",this.meters);
     },
 }
