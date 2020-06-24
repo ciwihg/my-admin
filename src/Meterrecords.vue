@@ -40,7 +40,8 @@
       <div v-if="displaymode=='compare'">
         <div class="m-compare-topbar">
           <el-date-picker
-
+            value-format="yyyy"
+            v-model="compareYear"
             type="year"
             placeholder="选择年">
           </el-date-picker>
@@ -72,33 +73,26 @@
         </el-table>
       </div>
       <div v-if="displaymode=='independent'">
-      <div class="m-tabs-wrap">
-         <m-selecttabs v-model="activetype" @updateactive="handletypeswitch">
-          <m-singetab name="water">水表</m-singetab>
-          <m-singetab name="eletric">电表</m-singetab>
-        </m-selecttabs>
-      </div>
+
       <div><el-button type="primary" @click="handleidpadd">新增记录</el-button></div>
         <div class="m-select-bar">
-        <el-select class="m-select-meter" v-model="postdata.mid" placeholder="请选择" @change="handleSubmit">
+        <el-select class="m-select-meter" v-model="postdata.mid" placeholder="请选择" >
             <el-option
               v-for="item in ometers"
               :key="item.id"
-              :label="swtype[item.type]+item.number"
+              :label="item.name"
               :value="item.id">
             </el-option>
         </el-select>
-        <el-select class="m-select-year" v-model="postdata.year" placeholder="请选择" @change="handleSubmit">
-            <el-option
-              v-for="item in oyears"
-              :key="item.YEARS"
-              :label="item.YEARS+`年`"
-              :value="item.YEARS">
-            </el-option>
-        </el-select>
+        <el-date-picker
+          value-format="yyyy"
+          v-model="indepYear"
+          type="year"
+          placeholder="选择年">
+        </el-date-picker>
       </div>
       <el-table
-      :data="tableData"
+      :data="idptabledata"
       :stripe="true"
       style="width: 100%">
       <el-table-column
@@ -192,6 +186,17 @@ export default {
           }
     return result;
   },
+  idptabledata:function(){
+    let vm = this;
+    let result=this.datascopy.records[this.postdata.mid].filter((i)=>{
+      if(i.date.substring(0,4)==vm.indepYear){
+        return true;
+      }else{
+        return false;
+      }
+    });
+    return result;
+  },
   metersobj:function () {
     let result={};
     this.datascopy.meters.forEach((item) => {
@@ -202,6 +207,7 @@ export default {
   comparetable:function(){
     let result={};
     let records;
+    let maxyear=0;
     (this.datascopy.records)&&(records=Object.values(this.datascopy.records));
     console.log(records);
     if(Array.isArray(records)){
@@ -211,23 +217,37 @@ export default {
             result[i.date].datas.push(i);
             result[i.date][i.mid]=i.data;
             result[i.date].rids[i.mid]=i.id;
+            (parseInt(i.date.substring(0,4))>maxyear)&&(maxyear=parseInt(i.date.substring(0,4)));
           }else{
             result[i.date]={date:i.date,rids:{},datas:[]};
             result[i.date].datas.push(i);
             result[i.date].rids[i.mid]=i.id;
             result[i.date][i.mid]=i.data;
+            (parseInt(i.date.substring(0,4))>maxyear)&&(maxyear=parseInt(i.date.substring(0,4)));
           }
         });
 
       });
 
     }
-    console.log(result);
-    return Object.values(result);
+  (this.compareYear=="0")&&(this.compareYear=String(maxyear));
+    let vm =this;
+    let t= Object.values(result).filter((i)=>{
+      if(i.date.substring(0,4)==vm.compareYear){
+        return true;
+      }else{
+        return false;
+      }
+    });
+    console.log(t);
+    return t;
   }
   },
   data () {
     return {
+      compareYear:"0",
+      indepYear:"2020",
+      filterrecords:[],
       cpostdate:{
         records:[],
         date:""
@@ -287,13 +307,20 @@ export default {
         this.datascopy = response.data;
         this.comparetabledata = response.data.meters;
         this.postdata.mid = this.datascopy.wmeterdefault;
-        this.ometers = this.datascopy.water;
-        this.tableData = this.datascopy.wrecords;
+        this.ometers = response.data.meters;
+        let yearl=this.datascopy.years[this.postdata.mid].length;
+
+        this.indepYear = String(this.datascopy.years[this.postdata.mid][yearl-1].YEARS);
+        //console.log(this.datascopy.years[this.postdata.mid][yearl-1].YEARS);
       }).catch((err)=>{
         console.log(err);
       });
     },
     handleiformclose:function(){
+    },
+    handleCyearchange:function(v){
+
+
     },
     handlemeteredit:function (row) {
       console.log(row);
