@@ -1,6 +1,8 @@
 <template>
 <div class="m-list-wrap">
+  <Filterbar :handler="filterdata"></Filterbar>
   <div class="m-customer-tab" @click="handleAddrenter">
+
     <div class="m-customer-body">
       <i class="el-icon-edit-outline"/>
       <div class="m-customer-tab-title">客户登记</div>
@@ -108,10 +110,14 @@
 
 <script>
 import {DeepClone} from '../utils/utils.js';
+import Filterbar from './component/filterbar.vue';
 import axios from 'axios';
 axios.defaults.baseURL = `https://easyhome.applinzi.com/public/index.php/ciwirent`;
 let storageprex="http://easyhome-rentadmin.stor.sinaapp.com/idcard/";
 export default {
+  components:{
+    'Filterbar':Filterbar,
+  },
   created:function(){
     let vm = this;
     this.$emit('update:title',this.title);
@@ -119,6 +125,15 @@ export default {
     this.getrenters();
   },
   methods:{
+    filterdata:function(conditions){
+      this.renters = this.Allrenters.filter((i)=>{
+        if(i.number==conditions.number&&i.address==conditions.address){
+          return true;
+        }else{
+          return false;
+        }
+      })
+    },
     handlereview:function (data) {
       console.log(data);
 
@@ -135,6 +150,7 @@ export default {
       let vm = this;
       axios.get('/customerpage/getallrenters').then(function(response){
         vm.renters = response.data;
+        vm.Allrenters = response.data;
       }).catch(
         function (error) {
           console.log(error);
@@ -315,6 +331,7 @@ export default {
   },
 data () {
   return {
+    Allrenters:[],
     idjpglist:[
 
     ],

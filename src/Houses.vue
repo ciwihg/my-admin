@@ -1,5 +1,6 @@
 <template>
 <div class="m-list-wrap">
+  <Filterbar :handler="filterdata"></Filterbar>
   <div class="m-addbtn-wrap"><el-button  @click="openaddform" class="m-btn-override" type="primary" size="medium">添加租盘<i class="el-icon-plus"/></el-button></div>
   <el-table
   size="medium"
@@ -74,11 +75,13 @@
 <script>
 import axios from 'axios';
 import Metercard from './component/metercard.vue';
+import Filterbar from './component/filterbar.vue';
 axios.defaults.baseURL = `https://easyhome.applinzi.com/public/index.php/ciwirent`;
 import {ObjToFormdata,DeepClone,SortChargeitems,HandleMeters} from '../utils/utils.js';
 export default {
   components:{
-    'm-meter-card':Metercard
+    'm-meter-card':Metercard,
+    'Filterbar':Filterbar,
   },
   created:function(){
     let vm = this;
@@ -88,7 +91,9 @@ export default {
     //console.log(vm.drawer);
     vm.$emit('update:title',vm.title);
     vm.$parent.$refs.drawer.closeDrawer();
+    vm.Allhouses=response.data;
     vm.tableData=response.data;
+    console.log(vm.Allhouses===vm.tableData);
   })
   .catch(function (error) {
     // handle error
@@ -101,6 +106,7 @@ export default {
 data () {
   return {
     tableData:[],
+    Allhouses:[],
     title:'我的租盘',
     AddVisible:false,
     chargeitems:"",
@@ -140,6 +146,15 @@ computed:{
 
 },
 methods:{
+  filterdata:function (conditions) {
+   this.tableData=this.Allhouses.filter((i)=>{
+     if(i.number==conditions.number&&i.address==conditions.address){
+       return true;
+     }else{
+       return false;
+     }
+   })
+  },
   setistbtns:function(index,bl){
     this.isbtns['is'+index]=bl;
   },
