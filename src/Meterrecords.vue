@@ -74,7 +74,7 @@
       </div>
       <div v-if="displaymode=='independent'">
 
-      <div><el-button type="primary" @click="handleidpadd">新增记录</el-button></div>
+      <div class="m-idptable-addwrap"><el-button type="primary"  width="100%" @click="handleidpadd">新增记录</el-button></div>
         <div class="m-select-bar">
         <el-select class="m-select-meter" v-model="postdata.mid" placeholder="请选择" >
             <el-option
@@ -121,40 +121,41 @@
     </div>
     <el-dialog
     v-if="datascopy.meters"
-  title="批量新增记录"
+  :title="cformtitle"
   :visible.sync="cformVisible"
   :show-close="false"
   width="90%">
   <div><span>{{cmetername}}</span></div>
-  <el-input  v-model="cmeterdata" placeholder="请输入记录" v-if="cmeternum<datascopy.meters.length"></el-input>
-  <el-date-picker
+  <div class="m-cform-input"><el-input  v-model="cmeterdata" placeholder="请输入记录" v-if="cmeternum<datascopy.meters.length"></el-input></div>
+  <div class="m-cform-date"><el-date-picker
   v-model="cpostdate.date"
     v-if="cmeternum==datascopy.meters.length"
     value-format="yyyy-MM-dd"
     type="date"
     placeholder="选择年">
-  </el-date-picker>
-  <el-button @click="handlecomaddnext" type="primary" v-if="cmeternum<datascopy.meters.length">下一项</el-button>
+  </el-date-picker></div>
+  <div class="m-cform-next"><el-button @click="handlecomaddnext" type="primary" v-if="cmeternum<datascopy.meters.length">下一项</el-button></div>
   <span slot="footer" class="dialog-footer">
     <el-button @click="cformVisible = false">取 消</el-button>
     <el-button type="primary" v-if="cmeternum==datascopy.meters.length" @click="haddandeditsumbit">保 存</el-button>
   </span>
 </el-dialog>
   <el-dialog
+  class="m-iform-wrap"
   v-if="datascopy.meters"
   @close="handleiformclose"
-  title="新增记录"
+  :title="iformtitle"
   :visible.sync="iformVisible"
   :show-close="false"
   width="90%">
   <div><span>{{cmetername}}</span></div>
-  <el-input  v-model="cmeterdata" placeholder="请输入记录"></el-input>
-  <el-date-picker
+  <div class="m-iform-input"><el-input  v-model="cmeterdata" placeholder="请输入记录"></el-input></div>
+  <div class="m-iform-date"><el-date-picker
     v-model="cpostdate.date"
     value-format="yyyy-MM-dd"
     type="date"
     placeholder="选择日期">
-  </el-date-picker>
+  </el-date-picker></div>
   <span slot="footer" class="dialog-footer">
     <el-button @click="iformVisible = false">取 消</el-button>
     <el-button type="primary"  @click="hiaddandeditsumbit">保 存</el-button>
@@ -245,6 +246,8 @@ export default {
   },
   data () {
     return {
+      cformtitle:'',
+      iformtitle:'',
       compareYear:"0",
       indepYear:"2020",
       filterrecords:[],
@@ -327,6 +330,7 @@ export default {
       this.iedit=false;
       this.medit=true;
       this.cpostdate.records=[];
+      this.iformtitle="修改最后记录";
       this.iformVisible=true;
       this.cmetername=row.name;
       this.cmeterdata=row.data;
@@ -342,6 +346,7 @@ export default {
       this.cpostdate.records=[];
       this.cpostdate.date="";
       this.iformVisible=true;
+      this.iformtitle="新增记录";
     },
     hiaddandeditsumbit:function () {
       let path;
@@ -404,6 +409,7 @@ export default {
       this.cmeternum=0;
       this.cpostdate.records=[];
       this.cpostdate.date="";
+      this.cformtitle="批量修改记录";
       this.cformVisible=true;
       this.cmetername=this.swtype[this.datascopy.meters[this.cmeternum].type]+this.datascopy.meters[this.cmeternum].number;
       this.cmeterdata=this.ceditdata[this.datascopy.meters[this.cmeternum].id];
@@ -464,6 +470,7 @@ export default {
       this.cmeterdata="";
       this.cpostdate.records=[];
       this.cpostdate.date="";
+      this.cformtitle="批量新增记录";
       this.cformVisible=true;
       this.cmetername=this.swtype[this.datascopy.meters[this.cmeternum].type]+this.datascopy.meters[this.cmeternum].number;
     },
@@ -491,6 +498,7 @@ export default {
       this.cmetername=this.swtype[this.metersobj[scop.mid].type]+this.metersobj[scop.mid].number;
       this.cmeterdata=scop.data;
       this.iformVisible=true;
+      this.iformtitle="修改记录";
     },
     handleDelete:function (scop) {
       console.log(scop);
@@ -530,6 +538,21 @@ export default {
 </script>
 
 <style scoped>
+.m-cform-input,.m-cform-date,.m-cform-next{
+  margin: .15rem 0;
+}
+.m-cform-next button{
+    width:100%;
+}
+.m-idptable-addwrap button{
+  width:100%;
+}
+.m-idptable-addwrap{
+  font-size: 0;
+}
+.m-iform-input,.m-iform-date{
+  margin: .15rem 0;
+}
 .m-compare-topbar{
 
   display: flex;
