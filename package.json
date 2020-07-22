@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "webpack-dev-server --open --config webpackconfig/base.js"
+    "dev": "webpack-dev-server --open --config webpackconfig/base.js",
+    "build":"webpack --config webpackconfig/build.js"
   },
   "keywords": [
     "vue",

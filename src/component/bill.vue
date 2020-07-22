@@ -11,7 +11,7 @@
      <th>总价</th>
    </tr>
    <tr v-for="(item,index) in emeters">
-     <th  class="m-bill-rowhead" rowspan="emeters.length" v-if="index==0">电费</th>
+     <th  class="m-bill-rowhead" :rowspan="emeters.length" v-if="index==0">电费</th>
      <td>{{'电表'+item.number}}</td>
      <td>{{Number(item.current).toFixed(2)}}</td>
      <td>{{Number(item.data).toFixed(2)}}</td>
@@ -64,6 +64,9 @@
     >
   </el-table-column>
 </el-table>
+<div class="m-print-btn-wrap">
+  <a class="m-print-btn" :href="oldprintbaseurl.substring(0,oldprintbaseurl.length-1)">打印</a>
+</div>
   </div>
 </template>
 
@@ -76,7 +79,7 @@ export default {
      wfee:0,
      emeters:[],
      wmeters:[],
-
+     oldprintbaseurl:'mprint://myprint.ciwi/easyhome?',
     };
   },
   computed:{
@@ -86,19 +89,28 @@ export default {
       let table;
       vm.efee=0;
       vm.wfee=0;
+      /*旧版本打印代码*/this.oldprintbaseurl='mprint://myprint.ciwi/easyhome?';
+      /*旧版本打印代码*/let oldwfl=0,oldwfc=0,oldwfp=0,oldefl=0,oldefc=0,oldefp=0;
       this.emeters=this.billdata.emeters;
       this.wmeters=this.billdata.wmeters;
-      table=this.billdata.chargeitems.map((i)=>{return i;});
+      /*旧版本打印代码*/this.oldprintbaseurl=this.oldprintbaseurl+"number="+this.billdata.house.number+"&租金="+this.billdata.house.price+"&";
+      table=this.billdata.chargeitems.map((i)=>{
+      /*旧版本打印代码*/this.oldprintbaseurl=this.oldprintbaseurl+i.name+"="+i.uprice+"&";
+        return i;});
       table.push({name:'租金',uprice:Number(this.billdata.house.price).toFixed(2)});
       this.emeters.map((i)=>{
         i.total = (i.current-i.data)*i.uprice;
         vm.efee+=i.total;
+        /*旧版本打印代码*/oldefp=i.uprice;oldefl+=parseInt(i.data);oldefc+=parseInt(i.current);
       });
+      /*旧版本打印代码*/this.oldprintbaseurl=this.oldprintbaseurl+"ef="+"l"+oldefl+"c"+oldefc+"p"+oldefp+"&";
       (this.emeters.length>0)&&table.push({name:'电费',uprice:Number(this.efee).toFixed(2)});
       this.wmeters.map((i)=>{
         i.total = (i.current-i.data)*i.uprice;
         vm.wfee+=i.total;
+        /*旧版本打印代码*/oldwfp=i.uprice;oldwfl+=parseInt(i.data);oldwfc+=parseInt(i.current);
       });
+      /*旧版本打印代码*/this.oldprintbaseurl=this.oldprintbaseurl+"wf="+"l"+oldwfl+"c"+oldwfc+"p"+oldwfp+"&";
       (this.wmeters.length>0)&&table.push({name:'水费',uprice:Number(this.wfee).toFixed(2)});
       let total = 0;
       table.map((i)=>{
@@ -150,6 +162,20 @@ export default {
 </script>
 
 <style scoped>
+.m-print-btn-wrap{
+  text-align: center;
+}
+.m-print-btn{
+  width:85%;
+  margin-top: .2rem;
+  display: inline-block;
+  background-color: #409eff;
+  color: white;
+  text-decoration: none;
+  padding: .05rem .1rem;
+  border-radius: 3px;
+
+}
 .m-bill-table{
 
   width: 100%;

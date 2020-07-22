@@ -43,7 +43,7 @@ export default {
   },
 data () {
   return {
-    title:"抄表及打印",
+    title:"结算",
     tableData:[],
     displaymode:'recommand',
     Alldatas:[],

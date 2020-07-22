@@ -26,14 +26,16 @@
     <div><el-checkbox v-model="recordcheckout">离开登记</el-checkbox></div>
      <div class="m-input-footer"><el-button type="primary" :disabled="showbill" @click="handlegeneratebill">生成账单</el-button></div>
     </div>
-    <el-select v-model="billnum" placeholder="请选择" v-if="billhistory" @change="handlehisbillgenerate">
-      <el-option
-       v-for="(item,index) in billhisoptions"
-       :key="index"
-       :label="item.date"
-       :value="index">
-      </el-option>
-    </el-select>
+    <div class="m-billhis-select-wrap">
+      <el-select v-model="billnum" placeholder="请选择" v-if="billhistory" @change="handlehisbillgenerate">
+        <el-option
+         v-for="(item,index) in billhisoptions"
+         :key="index"
+         :label="item.date"
+         :value="index">
+        </el-option>
+      </el-select>
+    </div>
     <m-bill :billdata="mbill" v-if="showbill"></m-bill>
   </div>
 </template>
@@ -48,7 +50,7 @@ export default {
   },
 data () {
   return {
-    title:"抄表及打印1",
+    title:"抄表及打印",
     tableData:[],
     wmeters:[],
     billhistory:false,
@@ -178,6 +180,12 @@ destroyed:function(){
 </script>
 
 <style scoped>
+.m-billhis-select-wrap{
+  font-size: 0;
+  background-color: white;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.03);
+  padding: .2rem .1rem;
+}
 .m-billhistory-btn{
   font-size: .15rem;
   padding: .15rem .2rem .15rem .3rem;

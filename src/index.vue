@@ -52,7 +52,7 @@ default-active="/"  :router="true">
 </el-menu-item>
 <el-menu-item index="/checkout">
   <i class="el-icon-setting"></i>
-  <span slot="title">抄表打印</span>
+  <span slot="title">结算</span>
 </el-menu-item>
 </el-menu>
 </el-drawer>
