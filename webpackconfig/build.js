@@ -1,14 +1,20 @@
 const path = require('path');
 const VueLoaderPlugin = require('vue-loader/lib/plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 module.exports = {
-  mode:'development',
-  entry:'./app.js',
+  mode:"production",
+  entry:{
+    appmain:'./appmain.js'},
   output: {
     filename: '[name].bundle.js',
     path: path.resolve(__dirname, '../dist'),
     publicPath:"/public/rentadmin/",
   },
+  optimization: {
+   minimizer: [new UglifyJsPlugin(
+      )],
+ },
   module:{
     rules:[
       {

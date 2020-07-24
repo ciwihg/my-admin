@@ -3,7 +3,7 @@ const VueLoaderPlugin = require('vue-loader/lib/plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 module.exports = {
   mode:'development',
-  entry:'./app.js',
+  entry:'./appmain.js',
   output: {
     filename: '[name].bundle.js',
     path: path.resolve(__dirname, '../dist'),
